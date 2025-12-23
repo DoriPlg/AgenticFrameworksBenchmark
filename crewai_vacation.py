@@ -10,11 +10,11 @@ from llmforall import get_llm_config
 from langfuse import get_client
 
 from openinference.instrumentation.crewai import CrewAIInstrumentor
-# from openinference.instrumentation.litellm import LiteLLMInstrumentor
+from openinference.instrumentation.litellm import LiteLLMInstrumentor
 from shared_tools import *
  
 CrewAIInstrumentor().instrument(skip_dep_check=True)
-# LiteLLMInstrumentor().instrument()
+LiteLLMInstrumentor().instrument()
 
  
 langfuse = get_client()

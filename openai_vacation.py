@@ -136,10 +136,10 @@ async def main(question):
         name="OpenAI Vacation Agent",
     ):
         result = await Runner.run(leader_agent, input=question, max_turns=40, session=session)
-    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-    print("Result: ", result)
-    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-    print(await Runner.run(leader_agent, input=input(), max_turns=40, session=session))
+        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+        print("Result: ", result)
+        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+        print(await Runner.run(leader_agent, input=input(), max_turns=40, session=session))
 
 DETAILS = """
     Our names are: Alan, Bella, Chris, and David.        My adress is Alan@domain.com        Book the dates as described in the vacation package.        We will stay in the cheapest hotel you can find for that duration.
