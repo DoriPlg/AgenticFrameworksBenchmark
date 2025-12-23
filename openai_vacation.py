@@ -94,7 +94,7 @@ LEADER_PROMPT="""
 
 def prepare_agents(models):
     tools = prepare_function_tools()
-    
+
     searcher_agent = Agent(
         model= models["small_model"],
         name="searcher_agent",
@@ -103,7 +103,7 @@ def prepare_agents(models):
     )
 
     query_session = SQLiteSession("QuerySession")
-    
+
     # booker_agent = Agent(
     #     model= models["small_model"],
     #     name="booker_agent",
@@ -141,14 +141,13 @@ async def main(question):
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print(await Runner.run(leader_agent, input=input(), max_turns=40, session=session))
 
-details = """
+DETAILS = """
     Our names are: Alan, Bella, Chris, and David.        My adress is Alan@domain.com        Book the dates as described in the vacation package.        We will stay in the cheapest hotel you can find for that duration.
     """
 
 if __name__ == "__main__":
-    question="""I need to find the *cheapest* vacation package to LA for a family of 4 living in New York, we are flexible with the dates and the destination.
+    QUESTION="""I need to find the *cheapest* vacation package to LA for a family of 4 living in New York,
+    we are flexible with the dates and the destination.
     Book the cheapest vacation package for us, including flights there and back and hotel stay.
     After that add 2 attractions to the vacation package."""
-    asyncio.run(main(question))
-
-    
+    asyncio.run(main(QUESTION))
