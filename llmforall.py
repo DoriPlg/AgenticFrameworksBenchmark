@@ -8,7 +8,7 @@ import os
 import json
 from typing import Dict, List, Union, Any, Optional
 from dotenv import load_dotenv
-from openai import OpenAI
+# from openai import OpenAI
 
 models=(
     "Meta-Llama-3_3-70B-Instruct",
@@ -95,41 +95,42 @@ def get_llm_config(model_choice: int = 0) -> dict:
         'api_key': os.getenv('OPENAI_API_KEY', 'dummy-key-not-needed'),
     }
 
-class OvhClient(OpenAI):
-    def __init__(self, model_num=0, **kwargs):
-        # Configure to use Ollama's endpoint
-        kwargs["base_url"] = os.getenv('OPENAI_API_BASE', f'http://localhost:{os.getenv("LLM_PROXY_PORT", "54844")}/ai-gen-proxy/llm/ovh/v1')
+# class OvhClient(OpenAI):
+#     def __init__(self, model_num=0, **kwargs):
+#         # Configure to use Ollama's endpoint
+#         kwargs["base_url"] = os.getenv('OPENAI_API_BASE', f'http://localhost:{os.getenv("LLM_PROXY_PORT", "54844")}/ai-gen-proxy/llm/ovh/v1')
 
-        # Ollama doesn't require an API key but the client expects one
-        kwargs["api_key"] = "dummy-key-not-needed"
+#         # Ollama doesn't require an API key but the client expects one
+#         kwargs["api_key"] = "dummy-key-not-needed"
 
-        super().__init__(**kwargs)
-        self.model_name = models[model_num]
+#         super().__init__(**kwargs)
+#         self.model_name = models[model_num]
         
-        # Check if the model exists
-        print(f"Using Ovh model: {self.model_name}")
+#         # Check if the model exists
+#         print(f"Using Ovh model: {self.model_name}")
 
-    def create_completion(self, *args, **kwargs):
-        # Override model name if not explicitly provided
-        if "model" not in kwargs:
-            kwargs["model"] = self.model_name
+#     def create_completion(self, *args, **kwargs):
+#         # Override model name if not explicitly provided
+#         if "model" not in kwargs:
+#             kwargs["model"] = self.model_name
 
-        return super().create_completion(*args, **kwargs)
+#         return super().create_completion(*args, **kwargs)
 
-    def create_chat_completion(self, *args, **kwargs):
-        # Override model name if not explicitly provided
-        if "model" not in kwargs:
-            kwargs["model"] = self.model_name
+#     def create_chat_completion(self, *args, **kwargs):
+#         # Override model name if not explicitly provided
+#         if "model" not in kwargs:
+#             kwargs["model"] = self.model_name
 
-        return super().create_chat_completion(*args, **kwargs)
+#         return super().create_chat_completion(*args, **kwargs)
         
-    # These methods are needed for compatibility with agents library
-    def completion(self, prompt, **kwargs):
-        if "model" not in kwargs:
-            kwargs["model"] = self.model_name
-        return self.completions.create(prompt=prompt, **kwargs)
+#     # These methods are needed for compatibility with agents library
+#     def completion(self, prompt, **kwargs):
+#         if "model" not in kwargs:
+#             kwargs["model"] = self.model_name
+#         return self.completions.create(prompt=prompt, **kwargs)
         
-    def chat_completion(self, messages, **kwargs):
-        if "model" not in kwargs:
-            kwargs["model"] = self.model_name
-        return self.chat.completions.create(messages=messages, **kwargs)
+#     def chat_completion(self, messages, **kwargs):
+#         if "model" not in kwargs:
+#             kwargs["model"] = self.model_name
+#         return self.chat.completions.create(messages=messages, **kwargs)
+    
