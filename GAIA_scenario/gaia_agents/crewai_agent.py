@@ -1,14 +1,12 @@
 """CrewAI agent implementation."""
-import sys
 from typing import Dict, Any, Optional, List
 import time
 from crewai import Agent, Crew, Process, Task, LLM
 from crewai.tools import BaseTool
 from pydantic import BaseModel
 
-sys.path.append('..')
-import shared_tools as st
-from agents.base_agent import BaseAgent, AgentResponse
+from gaia_agents.tools import shared_tools as st
+from gaia_agents.base_agent import BaseAgent, AgentResponse
 
 
 # Tool wrappers for CrewAI

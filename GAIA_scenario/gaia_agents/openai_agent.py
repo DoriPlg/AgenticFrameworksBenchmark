@@ -1,17 +1,12 @@
-import sys
+"""OpenAI Agents framework implementation."""
 from typing import Dict, Any, Optional, List
 import time
 import asyncio
 from agents import Agent, Runner, OpenAIChatCompletionsModel, AsyncOpenAI, function_tool, SQLiteSession
 from agents.run import RunContextWrapper
-import shared_tools as st
-from agents.base_agent import BaseAgent, AgentResponse
 
-# filepath: /home/dori/Documents/cleyrop/AgenticFrameworksBenchmark/GAIA_scenario/agents/openai_agent.py
-
-"""OpenAI Agents framework implementation."""
-
-sys.path.append('..')
+from gaia_agents.tools import shared_tools as st
+from gaia_agents.base_agent import BaseAgent, AgentResponse
 
 
 class OpenAIAgent(BaseAgent):
