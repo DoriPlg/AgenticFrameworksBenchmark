@@ -42,6 +42,10 @@ RUN mkdir -p /home/gaiauser/.local/share/crewai && \
 # Switch to non-root user
 USER gaiauser
 
+# Copy entrypoint script
+COPY --chown=gaiauser:gaiauser entrypoint.sh /app/
+RUN chmod +x /app/entrypoint.sh
+
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -50,5 +54,5 @@ ENV HF_HOME=/home/gaiauser/.cache/huggingface
 # Expose port if needed for monitoring/debugging
 EXPOSE 8000
 
-# Default command
-CMD ["python3", "crewai_gaia.py"]
+# Use entrypoint to download data first, then run app
+ENTRYPOINT ["/app/entrypoint.sh"]
