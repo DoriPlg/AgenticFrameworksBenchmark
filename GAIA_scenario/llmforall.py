@@ -81,7 +81,7 @@ def get_llm_config(model_choice: int = 0) -> dict:
     if 'mistral' in model.lower():
         return {
             'model': model,
-            'base_url': os.getenv('OPENAI_API_BASE', f'http://localhost:{os.getenv("LLM_PROXY_PORT", "54844")}/ai-gen-proxy/llm/ovh/v1'),
+            'base_url': os.getenv('OPENAI_API_BASE', f'http://host.docker.internal:{os.getenv("LLM_PROXY_PORT", "54844")}/ai-gen-proxy/llm/ovh/v1'),
             'api_key': os.getenv('OPENAI_API_KEY', 'dummy-key-not-needed'),
             'http_client': None,  # Will be set by the framework
             'message_normalizer': normalize_messages
@@ -91,14 +91,14 @@ def get_llm_config(model_choice: int = 0) -> dict:
     return {
         'model': model,
         'base_url': os.getenv('OPENAI_API_BASE', 
-        f'http://localhost:{os.getenv("LLM_PROXY_PORT", "54844")}/ai-gen-proxy/llm/ovh/v1'),
+        f'http://host.docker.internal:{os.getenv("LLM_PROXY_PORT", "54844")}/ai-gen-proxy/llm/ovh/v1'),
         'api_key': os.getenv('OPENAI_API_KEY', 'dummy-key-not-needed'),
     }
 
 # class OvhClient(OpenAI):
 #     def __init__(self, model_num=0, **kwargs):
 #         # Configure to use Ollama's endpoint
-#         kwargs["base_url"] = os.getenv('OPENAI_API_BASE', f'http://localhost:{os.getenv("LLM_PROXY_PORT", "54844")}/ai-gen-proxy/llm/ovh/v1')
+#         kwargs["base_url"] = os.getenv('OPENAI_API_BASE', f'http://host.docker.internal:{os.getenv("LLM_PROXY_PORT", "54844")}/ai-gen-proxy/llm/ovh/v1')
 
 #         # Ollama doesn't require an API key but the client expects one
 #         kwargs["api_key"] = "dummy-key-not-needed"
