@@ -6,20 +6,20 @@ from crewai import Agent, Crew, Process, Task, LLM
 from crewai.tools import BaseTool
 from crewai_tools import SerperDevTool
 # --- LLM & Tracing Setup ---
-from llmforall import get_llm_config
+from GAIA_scenario.llmforall import get_llm_config
 from langfuse import get_client
 
 from openinference.instrumentation.crewai import CrewAIInstrumentor
 from openinference.instrumentation.litellm import LiteLLMInstrumentor
 from shared_tools import *
- 
+
 CrewAIInstrumentor().instrument(skip_dep_check=True)
 LiteLLMInstrumentor().instrument()
 
- 
+
 langfuse = get_client()
 llm_config_big = get_llm_config(0)
-    
+
 llm_big = LLM(
     model=f"openai/{llm_config_big['model']}",
     base_url=llm_config_big['base_url'],
@@ -34,11 +34,6 @@ llm_small = LLM(
     api_key=llm_config_small['api_key']
 )
 
-if not os.getenv("SERPER_API_KEY"):
-    raise EnvironmentError(
-        "SERPER_API_KEY not found in .env file. "
-        "Please get a key from serper.dev and add it to src/.env"
-    )
 
 # ==================================================
 # Tools
@@ -49,8 +44,8 @@ class WebSearchTool(BaseTool):
     description: str = "Search online for information."
     args_schema: Type[BaseModel] = WebSearchInput
 
-    def _run(self, query: str, max_results: int) -> List[WebSearchResult]:
-        return web_search(query=query, max_results=max_results)
+    def _run(self, *args, **kwargs) -> List[WebSearchResult]:
+        return web_search(query=kwargs.get('query'), max_results=kwargs.get('max_results'))
 
 class QueryDatabaseTool(BaseTool):
     name: str = "query_database"
@@ -74,8 +69,8 @@ class QueryDatabaseTool(BaseTool):
     Write a SELECT query to retrieve the information needed."""
     args_schema: Type[BaseModel] = SQLQueryInput
 
-    def _run(self, query: str) -> SQLQueryResult:
-        return query_database(query=query)
+    def _run(self, *args, **kwargs) -> SQLQueryResult:
+        return query_database(query=kwargs.get('query'))
 
 class CreateBookingTool(BaseTool):
     name: str = "create_booking"

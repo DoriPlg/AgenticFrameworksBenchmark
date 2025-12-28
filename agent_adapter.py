@@ -1,4 +1,4 @@
-from llmforall import OvhClient
+from GAIA_scenario.llmforall import OvhClient
 from openai.types.chat import ChatCompletion, ChatCompletionMessage
 import agents.agent as agent_module
 from agents.agent import Agent
