@@ -29,9 +29,9 @@ fi
 
 echo ""
 echo "======================================"
-echo "Starting GAIA Agent..."
+echo "Starting GAIA Test Suite..."
 echo "======================================"
 echo ""
 
-# Run the main application with any provided arguments
-exec python3 crewai_gaia.py "$@"
+# Always run the modular test framework
+exec python3 gaia_tester.py "$@"
