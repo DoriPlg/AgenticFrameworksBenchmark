@@ -12,6 +12,13 @@ services:
       - LANGFUSE_HOST=${LANGFUSE_HOST:-https://cloud.langfuse.com}
       # HuggingFace token for GAIA dataset access
       - HF_TOKEN=${HF_TOKEN}
+      # Test configuration variables
+      - FRAMEWORK=${FRAMEWORK:-crewai}
+      - MODEL_IDX=${MODEL_IDX:-0}
+      - NUM_QUESTIONS=${NUM_QUESTIONS:-5}
+      - START_IDX=${START_IDX:-0}
+      - TEST_MODE=${TEST_MODE:-single}
+      - OUTPUT_DIR=${OUTPUT_DIR:-/app/output}
       # Add any other environment variables your llmforall.py needs
     extra_hosts:
       # Allow container to access host services via host.docker.internal

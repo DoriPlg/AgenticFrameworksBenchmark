@@ -4,48 +4,45 @@ FROM python:3.11-slim
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies (cached unless system packages change)
 RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements and install Python dependencies
+# Copy ONLY requirements first (cached unless requirements change)
 COPY requirements.txt .
+
+# Install Python dependencies (this layer is cached!)
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application files
-COPY shared_tools.py .
-COPY crewai_gaia.py .
-COPY data/data_pull.py ./data/
-
-# Copy parent directory file needed for execution
-COPY ../llmforall.py ./
-
-# Create directory for data files (GAIA test files)
-RUN mkdir -p /app/data
-
-# Create a non-root user for security
-RUN useradd -m -u 1000 gaiauser
-
-# Create necessary directories in /app (already owned by root, will chown below)
-RUN mkdir -p /app/hf_cache && \
-    mkdir -p /app/crewai_storage && \
-    mkdir -p /app/output && \
+# Create user and directories BEFORE copying app files
+RUN useradd -m -u 1000 gaiauser && \
+    mkdir -p /app/data /app/hf_cache /app/crewai_storage /app/output /app/agents && \
     chown -R gaiauser:gaiauser /app
+
+# NOW copy application files (changes here won't invalidate pip install)
+COPY --chown=gaiauser:gaiauser shared_tools.py .
+COPY --chown=gaiauser:gaiauser gaia_tester.py .
+COPY --chown=gaiauser:gaiauser agents/ ./agents/
+COPY --chown=gaiauser:gaiauser data/data_pull.py ./data/
+COPY --chown=gaiauser:gaiauser ../llmforall.py ./
+COPY --chown=gaiauser:gaiauser entrypoint.sh /app/
+
+# Make entrypoint executable
+RUN chmod +x /app/entrypoint.sh
 
 # Switch to non-root user
 USER gaiauser
-
-# Copy entrypoint script
-COPY --chown=gaiauser:gaiauser entrypoint.sh /app/
-RUN chmod +x /app/entrypoint.sh
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV HF_HOME=/app/hf_cache
 ENV CREWAI_STORAGE_DIR=/app/crewai_storage
+# Disable LiteLLM logging to avoid clutter
+ENV LITELLM_LOG=ERROR
+ENV LITELLM_DISABLE_LOGGING=true
 
 # Expose port if needed for monitoring/debugging
 EXPOSE 8000
