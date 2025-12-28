@@ -47,11 +47,14 @@ GAIA_scenario/
 ├── entrypoint.sh          # Startup script
 ├── requirements.txt        # Python dependencies
 ├── gaia_tester.py         # Main test runner (modular)
-├── shared_tools.py        # Shared tool implementations
 ├── agents/
+│   ├── __init__.py        # Package initialization
 │   ├── base_agent.py      # Abstract base class
 │   ├── crewai_agent.py    # CrewAI implementation
-│   └── langgraph_agent.py # LangGraph implementation
+│   ├── langgraph_agent.py # LangGraph implementation
+│   ├── openai_agent.py    # OpenAI implementation
+│   └── tools/
+│       └── shared_tools.py # Shared tool implementations
 ├── data/
 │   └── data_pull.py       # GAIA dataset downloader
 └── output/                # Results (JSON files)
@@ -181,7 +184,7 @@ All agents must inherit from `BaseAgent` and implement:
 This ensures consistency and catches errors at import time.
 
 ### Shared Tools
-All frameworks use the same tool implementations from `shared_tools.py`:
+All frameworks use the same tool implementations from `agents/tools/shared_tools.py`:
 - `web_search()` - DuckDuckGo search
 - `read_webpage()` - BeautifulSoup scraping
 - `inspect_file()` - PDF/text file reading

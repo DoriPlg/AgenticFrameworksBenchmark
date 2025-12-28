@@ -22,7 +22,6 @@ RUN useradd -m -u 1000 gaiauser && \
     chown -R gaiauser:gaiauser /app
 
 # NOW copy application files (changes here won't invalidate pip install)
-COPY --chown=gaiauser:gaiauser shared_tools.py .
 COPY --chown=gaiauser:gaiauser gaia_tester.py .
 COPY --chown=gaiauser:gaiauser agents/ ./agents/
 COPY --chown=gaiauser:gaiauser data/data_pull.py ./data/
