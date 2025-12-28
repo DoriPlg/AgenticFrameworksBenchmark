@@ -1,5 +1,5 @@
-import sys
-from typing import Dict, Any, Optional, List
+"""LangGraph agent implementation."""
+from typing import Dict, Any, Optional, List, TypedDict, Annotated, Sequence, Literal
 import time
 from langgraph.graph import StateGraph, END
 from langgraph.graph.message import add_messages
@@ -7,13 +7,9 @@ from langgraph.prebuilt import ToolNode
 from langchain_openai import ChatOpenAI
 from langchain_core.tools import StructuredTool
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
-from typing import TypedDict, Annotated, Sequence, Literal
-import shared_tools as st
-from agents.base_agent import BaseAgent, AgentResponse
 
-"""LangGraph agent implementation."""
-
-sys.path.append('..')
+from gaia_agents.tools import shared_tools as st
+from gaia_agents.base_agent import BaseAgent, AgentResponse
 
 
 # Graph State
