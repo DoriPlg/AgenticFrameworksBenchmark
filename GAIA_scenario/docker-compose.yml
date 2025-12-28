@@ -16,14 +16,11 @@ services:
       - HF_TOKEN=${HF_TOKEN}
       # Add any other environment variables your llmforall.py needs
     volumes:
-      # Mount data directory for GAIA test files
-      - ./data:/app/data:ro
-      # Optional: Mount output directory for results
+      # Optional: Mount output directory for results only
       - ./output:/app/output
       # CrewAI storage (needs write access)
       - crewai-storage:/home/gaiauser/.local/share/crewai
-      # HuggingFace cache for GAIA dataset
-      - hf-cache:/home/gaiauser/.cache/huggingface
+      # Note: HF cache is NOT mounted - completely isolated in container
     networks:
       - gaia-network
     # Resource limits for security
@@ -47,8 +44,6 @@ services:
 
 volumes:
   crewai-storage:
-    driver: local
-  hf-cache:
     driver: local
 
 networks:
