@@ -26,18 +26,13 @@ COPY ../llmforall.py ./
 RUN mkdir -p /app/data
 
 # Create a non-root user for security
-RUN useradd -m -u 1000 gaiauser && \
-    chown -R gaiauser:gaiauser /app
+RUN useradd -m -u 1000 gaiauser
 
-# Create necessary directories for CrewAI and HuggingFace storage
-RUN mkdir -p /home/gaiauser/.local/share/crewai && \
-    mkdir -p /home/gaiauser/.cache/huggingface && \
-    mkdir -p /home/gaiauser/.cache && \
+# Create necessary directories in /app (already owned by root, will chown below)
+RUN mkdir -p /app/hf_cache && \
+    mkdir -p /app/crewai_storage && \
     mkdir -p /app/output && \
-    mkdir -p /tmp/crewai && \
-    chown -R gaiauser:gaiauser /home/gaiauser/.local && \
-    chown -R gaiauser:gaiauser /home/gaiauser/.cache && \
-    chown -R gaiauser:gaiauser /app/output
+    chown -R gaiauser:gaiauser /app
 
 # Switch to non-root user
 USER gaiauser
@@ -49,7 +44,8 @@ RUN chmod +x /app/entrypoint.sh
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
-ENV HF_HOME=/home/gaiauser/.cache/huggingface
+ENV HF_HOME=/app/hf_cache
+ENV CREWAI_STORAGE_DIR=/app/crewai_storage
 
 # Expose port if needed for monitoring/debugging
 EXPOSE 8000
