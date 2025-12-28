@@ -5,6 +5,7 @@ langchain-community>=0.0.20
 
 # LLM and Tracing
 litellm>=1.0.0
+apscheduler>=3.10.0
 fastapi>=0.100.0
 langfuse>=2.0.0
 openinference-instrumentation-crewai>=0.1.0
@@ -21,6 +22,7 @@ openpyxl>=3.1.0
 
 # Data validation
 pydantic>=2.0.0
+pydantic[email]>=2.0.0
 
 # Hugging Face datasets (for GAIA benchmark)
 datasets>=2.14.0
