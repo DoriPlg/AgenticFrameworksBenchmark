@@ -19,9 +19,10 @@ from datasets import load_dataset
 
 sys.path.append('..')
 from llmforall import get_llm_config
+from agents.base_agent import BaseAgent, AgentResponse
 
 # Agent registry - add your agents here
-AGENT_REGISTRY = {}
+AGENT_REGISTRY: Dict[str, type[BaseAgent]] = {}
 
 def register_agent(name):
     """Decorator to register agents."""
@@ -37,12 +38,17 @@ try:
 except ImportError as e:
     print(f"Warning: CrewAI agent not available - {e}")
 
-# Add more agents as you implement them
-# try:
-#     from agents.langgraph_agent import LangGraphAgent
-#     AGENT_REGISTRY['langgraph'] = LangGraphAgent
-# except ImportError:
-#     pass
+try:
+    from agents.langgraph_agent import LangGraphAgent
+    AGENT_REGISTRY['langgraph'] = LangGraphAgent
+except ImportError as e:
+    print(f"Warning: LangGraph agent not available - {e}")
+
+try:
+    from agents.openai_agent import OpenAIAgent
+    AGENT_REGISTRY['openai'] = OpenAIAgent
+except ImportError as e:
+    print(f"Warning: OpenAI agent not available - {e}")
 
 
 def load_gaia_dataset():

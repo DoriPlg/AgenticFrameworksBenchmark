@@ -2,22 +2,13 @@
 import sys
 from typing import Dict, Any, Optional, List
 import time
-from dataclasses import dataclass
 from crewai import Agent, Crew, Process, Task, LLM
 from crewai.tools import BaseTool
 from pydantic import BaseModel
 
 sys.path.append('..')
 import shared_tools as st
-
-
-@dataclass
-class AgentResponse:
-    """Standardized response from any agent."""
-    answer: str
-    execution_time: float
-    tools_used: Optional[List[str]] = None
-    metadata: Optional[Dict[str, Any]] = None
+from agents.base_agent import BaseAgent, AgentResponse
 
 
 # Tool wrappers for CrewAI
@@ -53,12 +44,11 @@ class PythonExecutorTool(BaseTool):
         return st.python_interpreter(code=kwargs.get('code'))
 
 
-class CrewAIAgent:
-    """CrewAI implementation."""
+class CrewAIAgent(BaseAgent):
+    """CrewAI-based agent implementation."""
     
     def __init__(self, model_config: Dict[str, Any], verbose: bool = False):
-        self.model_config = model_config
-        self.verbose = verbose
+        super().__init__(model_config, verbose)
         
         self.llm = LLM(
             model=f"openai/{model_config['model']}",
