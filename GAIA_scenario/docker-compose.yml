@@ -19,6 +19,9 @@ services:
       - START_IDX=${START_IDX:-0}
       - TEST_MODE=${TEST_MODE:-single}
       - OUTPUT_DIR=${OUTPUT_DIR:-/app/output}
+      # Suppress Pydantic serialization warnings (non-critical)
+      - PYTHONWARNINGS=ignore::UserWarning:pydantic
+      - PYTHONWARNINGS=ignore::RuntimeWarning
       # Add any other environment variables your llmforall.py needs
     extra_hosts:
       # Allow container to access host services via host.docker.internal
