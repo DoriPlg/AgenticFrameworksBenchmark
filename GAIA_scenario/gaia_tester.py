@@ -65,7 +65,7 @@ def load_gaia_dataset():
     if not data_dir:
         raise RuntimeError("GAIA dataset not found. Run data_pull.py first.")
     
-    dataset = load_dataset(data_dir, "2023_level1", split="test")
+    dataset = load_dataset(data_dir, "2023_level1", split="validation")
     return dataset, data_dir
 
 
