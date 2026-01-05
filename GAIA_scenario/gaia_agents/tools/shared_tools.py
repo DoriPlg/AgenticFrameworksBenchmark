@@ -5,7 +5,7 @@ import requests
 import pandas as pd
 from bs4 import BeautifulSoup
 from pypdf import PdfReader
-from duckduckgo_search import DDGS
+from ddgs import DDGS
 from pydantic import BaseModel, Field
 from typing import List, Dict, Any, Optional
 import contextlib
