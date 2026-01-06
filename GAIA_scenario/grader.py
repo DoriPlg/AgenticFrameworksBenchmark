@@ -1,13 +1,18 @@
 import json
 from typing import Dict, Optional
-from litellm import completion
+from langchain_openai import ChatOpenAI
 
 
 class AnswerGrader:
     """Grades agent answers using an LLM to handle formatting variations."""
     
-    def __init__(self, model: str = "gpt-4"):
-        self.model = model
+    def __init__(self, model: dict):
+        self.llm = ChatOpenAI(
+            model=model['model'],
+            base_url=model['base_url'],
+            api_key=model['api_key'],
+            temperature= 0,
+        )
         
     def grade_answer(self, agent_answer: Optional[str], correct_answer: str, question: str) -> Dict:
         """
@@ -44,20 +49,15 @@ Respond in JSON format with:
 JSON response:"""
 
         try:
-            response = completion(
-                model=self.model,
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0
-            )
-            
-            result_text = response.choices[0].message.content.strip()
+            response = self.llm.invoke([{"role": "user", "content": prompt}])
+            result_text = response.content
             # Extract JSON from markdown code blocks if present
             if "```json" in result_text:
                 result_text = result_text.split("```json")[1].split("```")[0].strip()
             elif "```" in result_text:
                 result_text = result_text.split("```")[1].split("```")[0].strip()
-                
             result = json.loads(result_text)
+
             return result
             
         except Exception as e:

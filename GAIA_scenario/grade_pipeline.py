@@ -3,13 +3,19 @@ from pathlib import Path
 from typing import Dict, Optional
 from datetime import datetime
 from grader import AnswerGrader
+from llmforall import get_llm_config
 
 
 class GradingPipeline:
     """Pipeline to grade all agent answers in a comparison file."""
     
-    def __init__(self, grader_model: str = "gpt-4"):
+    def __init__(self, grader_model: dict):
+        if "host.docker.internal" in grader_model["base_url"]:
+            print("Note: Grader is configured to use host.docker.internal for LLM proxy.")
+            print("Switching to localhost for compatibility.")
+            grader_model["base_url"] = grader_model["base_url"].replace("host.docker.internal", "localhost")
         self.grader = AnswerGrader(model=grader_model)
+        self.model_name = grader_model['model']
         
     def grade_comparison_file(self, input_path: str, output_path: Optional[str] = None) -> Dict:
         """
@@ -53,7 +59,7 @@ class GradingPipeline:
                 "graded_questions": graded_count,
                 "correct_answers": correct_count,
                 "accuracy": correct_count / graded_count if graded_count > 0 else 0,
-                "grader_model": self.grader.model,
+                "grader_model": self.model_name,
                 "graded_at": datetime.now().isoformat()
             }
             
@@ -85,5 +91,5 @@ if __name__ == "__main__":
     input_path = sys.argv[1]
     output_path = sys.argv[2] if len(sys.argv) > 2 else None
     
-    pipeline = GradingPipeline(grader_model="gpt-4")
+    pipeline = GradingPipeline(grader_model=get_llm_config())
     pipeline.grade_comparison_file(input_path, output_path)
