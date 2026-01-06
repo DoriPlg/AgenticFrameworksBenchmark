@@ -13,6 +13,10 @@ apscheduler>=3.10.0
 fastapi>=0.100.0
 langfuse>=2.0.0
 openinference-instrumentation>=0.1.42
+openinference-instrumentation-crewai>=0.1.0
+openinference-instrumentation-litellm>=0.1.0
+openinference-instrumentation-openai_agents>=0.1.0
+nest-asyncio>=1.5.6
 
 # Tools and utilities
 ddgs>=6.0.0

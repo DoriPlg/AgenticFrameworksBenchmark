@@ -5,9 +5,16 @@ import asyncio
 from agents import Agent, Runner, OpenAIChatCompletionsModel, AsyncOpenAI, function_tool, SQLiteSession
 from agents.run import RunContextWrapper
 
+from langfuse import get_client
+import nest_asyncio
+from openinference.instrumentation.openai_agents import OpenAIAgentsInstrumentor
+
 from gaia_agents.tools import shared_tools as st
 from gaia_agents.base_agent import BaseAgent, AgentResponse
 
+nest_asyncio.apply()
+OpenAIAgentsInstrumentor().instrument()
+langfuse = get_client()
 
 class OpenAIAgent(BaseAgent):
     """OpenAI Agents framework-based agent implementation."""
@@ -41,10 +48,7 @@ class OpenAIAgent(BaseAgent):
     def _build_agent(self) -> Agent:
         """Build the OpenAI Agent."""
         system_prompt = (
-            "You are an elite research assistant with expertise in information retrieval, "
-            "data analysis, and problem-solving. You excel at breaking down complex questions, "
-            "gathering information, and synthesizing accurate answers.\n\n"
-            "Use the available tools when needed and provide clear, factual answers."
+            "You are a general AI assistant. I will ask you a question. Report your thoughts, and finish your answer with the following template: FINAL ANSWER: [YOUR FINAL ANSWER]. YOUR FINAL ANSWER should be a number OR as few words as possible OR a comma separated list of numbers and/or strings. If you are asked for a number, don't use comma to write your number neither use units such as $ or percent sign unless specified otherwise. If you are asked for a string, don't use articles, neither abbreviations (e.g. for cities), and write the digits in plain text unless specified otherwise. If you are asked for a comma separated list, apply the above rules depending of whether the element to be put in the list is a number or a string."
         )
         
         agent = Agent(
@@ -67,7 +71,14 @@ class OpenAIAgent(BaseAgent):
         full_question = f"{question}{file_context}"
         
         # Run the agent asynchronously
-        result = asyncio.run(self._run_async(full_question))
+        with langfuse.start_as_current_observation(
+            name="OpenAI GAIA Attempt", 
+            metadata={"framework": "openai_agents", "model": self.model_config["model"]},
+            input=full_question
+        ) as observation:
+            result = asyncio.run(self._run_async(full_question))
+            observation.update(output=result)
+        langfuse.flush()
         
         # Extract answer from result
         answer = self._extract_answer(result)
@@ -86,7 +97,7 @@ class OpenAIAgent(BaseAgent):
             max_turns=50,
             session=self.session
         )
-        return result
+        return result.final_output
     
     def _extract_answer(self, result: Any) -> str:
         """Extract the answer from the agent result."""

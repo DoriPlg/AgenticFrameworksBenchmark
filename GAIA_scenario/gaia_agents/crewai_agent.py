@@ -8,6 +8,22 @@ from pydantic import BaseModel
 from gaia_agents.tools import shared_tools as st
 from gaia_agents.base_agent import BaseAgent, AgentResponse
 
+from langfuse import get_client
+
+from openinference.instrumentation.crewai import CrewAIInstrumentor
+from openinference.instrumentation.litellm import LiteLLMInstrumentor
+
+CrewAIInstrumentor().instrument(skip_dep_check=True)
+LiteLLMInstrumentor().instrument()
+
+langfuse = get_client()
+# Verify connection
+if langfuse.auth_check():
+    print("Langfuse client is authenticated and ready!")
+else:
+    print("Authentication failed. Please check your credentials and host.")
+
+
 
 # Tool wrappers for CrewAI
 class WebSearchTool(BaseTool):
@@ -47,7 +63,7 @@ class CrewAIAgent(BaseAgent):
     
     def __init__(self, model_config: Dict[str, Any], verbose: bool = False):
         super().__init__(model_config, verbose)
-        
+        self.model_config = model_config
         self.llm = LLM(
             model=f"openai/{model_config['model']}",
             base_url=model_config['base_url'],
@@ -58,9 +74,7 @@ class CrewAIAgent(BaseAgent):
             role="Expert Research and Analysis Assistant",
             goal="Answer complex, multi-step questions accurately",
             backstory=(
-                "You are an elite research assistant with expertise in information retrieval, "
-                "data analysis, and problem-solving. You excel at breaking down complex questions, "
-                "gathering information, and synthesizing accurate answers."
+                "You are a general AI assistant. I will ask you a question. Report your thoughts, and finish your answer with the following template: FINAL ANSWER: [YOUR FINAL ANSWER]. YOUR FINAL ANSWER should be a number OR as few words as possible OR a comma separated list of numbers and/or strings. If you are asked for a number, don't use comma to write your number neither use units such as $ or percent sign unless specified otherwise. If you are asked for a string, don't use articles, neither abbreviations (e.g. for cities), and write the digits in plain text unless specified otherwise. If you are asked for a comma separated list, apply the above rules depending of whether the element to be put in the list is a number or a string."
             ),
             tools=[WebSearchTool(), WebBrowserTool(), FileInspectorTool(), PythonExecutorTool()],
             llm=self.llm,
@@ -98,11 +112,20 @@ class CrewAIAgent(BaseAgent):
             verbose=self.verbose,
             memory=False,
         )
+
+        with langfuse.start_as_current_observation(as_type= "span",
+            name="CrewAI GAIA Attempt", 
+            metadata={"framework": "crewai", "model": self.model_config["model"]},
+            input= {"question": question}
+            ) as observation:
+            result = crew.kickoff()
+            observation.update(output= result)
         
-        result = crew.kickoff()
-        
+        langfuse.flush()
         return AgentResponse(
             answer=str(result),
             execution_time=time.time() - start_time,
             metadata={"framework": "crewai", "model": self.model_config["model"]}
         )
+        
+ 
