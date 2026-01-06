@@ -164,7 +164,7 @@ if __name__ == "__main__":
     with langfuse.start_as_current_observation(
         name="VacationPlannerHierarchical",
         metadata={"crew_type": "hierarchical", "goal": "Find the cheapest vacation package"},
-    ) as obs:
+    ):
         try:
             print("Kicking off the Vacation Planner Crew...")
             result = crew.kickoff()
