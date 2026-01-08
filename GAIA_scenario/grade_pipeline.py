@@ -62,6 +62,11 @@ class GradingPipeline:
                 "grader_model": self.model_name,
                 "graded_at": datetime.now().isoformat()
             }
+
+            graded_framework["grading_summary"]["literary_details"] = self.grader.access_preformance(
+                framework_data["questions"],
+                graded_framework["grading_summary"]
+            )
             
             graded_data[framework] = graded_framework
             if graded_count > 0:
