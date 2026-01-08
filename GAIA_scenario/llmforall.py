@@ -8,16 +8,36 @@ import os
 import json
 from typing import Dict, List, Union, Any, Optional
 from dotenv import load_dotenv
+import requests
 # from openai import OpenAI
 
-models=(
-    "Meta-Llama-3_3-70B-Instruct",
-    "Llama-3.1-8B-Instruct",
-    "Mistral-Small-3.2-24B-Instruct-2506",
-    "Mixtral-8x7B-Instruct-v0.1",
-    "gpt-oss-120b",
-    "gpt-oss-20b"
-)
+
+def get_available_models(base_url: str = None) -> List[str]:
+    """Fetch available models from the LLM proxy endpoint.
+    
+    Args:
+        base_url: Optional base URL for the models endpoint.
+                 If not provided, uses LLM_PROXY_PORT from environment.
+    
+    Returns:
+        List of available model names
+    """
+    if base_url is None:
+        port = os.getenv("LLM_PROXY_PORT", "54844")
+        base_url = f"http://host.docker.internal:{port}"
+    
+    try:
+        response = requests.get(f"{base_url}/llm/models", timeout=5)
+        response.raise_for_status()
+        data = response.json()
+        
+        # Handle different response formats
+        return [model["model_name"] for model in data]
+    except Exception as e:
+        print(f"Warning: Could not fetch models from {base_url}/llm/models: {e}")
+        return []
+
+models= get_available_models()
 # Load environment variables
 load_dotenv()
 
@@ -64,11 +84,17 @@ def get_llm_config(model_choice: int = 0) -> dict:
     Args:
         model_choice (int): Index of the model to use (default: 0)
             0: Meta-Llama-3_3-70B-Instruct
-            1: Llama-3.1-8B-Instruct
-            2: Mistral-Small-3.2-24B-Instruct-2506
-            3: Mixtral-8x7B-Instruct-v0.1
-            4: gpt-oss-120b
-            5: gpt-oss-20b
+            1: Qwen2.5-Coder-32B-Instruct
+            2: DeepSeek-R1-Distill-Llama-70B
+            3: Mistral-Nemo-Instruct-2407
+            4: gpt-oss-20b
+            5: Qwen2.5-VL-72B-Instruct
+            6: Qwen3-32B
+            7: Llama-3.1-8B-Instruct
+            8: Mistral-Small-3.2-24B-Instruct-2506
+            9: Mixtral-8x7B-Instruct-v0.1
+            10: gpt-oss-120b
+            11: Mistral-7B-Instruct-v0.3
     
     Returns:
         dict: Configuration with model, base_url, and api_key
