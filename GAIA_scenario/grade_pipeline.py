@@ -63,6 +63,7 @@ class GradingPipeline:
                 "graded_at": datetime.now().isoformat()
             }
 
+            print("Calculating literary details...")
             graded_framework["grading_summary"]["literary_details"] = self.grader.access_preformance(
                 framework_data["questions"],
                 graded_framework["grading_summary"]
@@ -85,14 +86,27 @@ class GradingPipeline:
         print(f"\nGraded results saved to: {output_path}")
         return graded_data
 
-
+def fix_accessment(input_path: str):
+    with open(input_path, 'r') as f:
+        data = json.load(f)
+    grader = GradingPipeline(grader_model=get_llm_config())
+    for _, framework_data in data.items():
+        framework_data["grading_summary"]["literary_details"] = grader.grader.access_preformance(
+            framework_data["questions"],
+            framework_data["grading_summary"]
+        )
+    with open(input_path, 'w') as f:
+        json.dump(data, f, indent=2)
+    
 if __name__ == "__main__":
     import sys
     
     if len(sys.argv) < 2:
         print("Usage: python grade_pipeline.py <comparison_json_path> [output_path]")
         sys.exit(1)
-    
+    if sys.argv[1].endswith("_graded.json"):
+        fix_accessment(sys.argv[1])
+        sys.exit(0)
     input_path = sys.argv[1]
     output_path = sys.argv[2] if len(sys.argv) > 2 else None
     
