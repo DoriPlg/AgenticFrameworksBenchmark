@@ -5,8 +5,8 @@ import time
 from langgraph.graph import StateGraph
 from langchain.agents import create_agent
 from langchain_openai import ChatOpenAI
-from langchain_core.tools import StructuredTool
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.messages import HumanMessage
+from langchain_core.tools import tool
 
 from langfuse.langchain import CallbackHandler
 
@@ -15,6 +15,25 @@ from gaia_agents.base_agent import BaseAgent, AgentResponse
 
 langfuse_handler = CallbackHandler()
 
+@tool(description=st.web_search.__doc__, args_schema=st.SearchInput)
+def web_search(query: str) -> str:
+    """Perform a web search and return results."""
+    return st.web_search(query)
+
+@tool(description=st.read_webpage.__doc__, args_schema=st.BrowserInput)
+def read_webpage(url: str) -> str:
+    """Read a webpage and return its content."""
+    return st.read_webpage(url)
+
+@tool(description=st.inspect_file.__doc__, args_schema=st.FileToolInput)
+def inspect_file(file_path: str, query: str) -> str:
+    """Inspect a file and return its content."""
+    return st.inspect_file(file_path, query)
+
+@tool(description=st.python_interpreter.__doc__, args_schema=st.PythonInput)
+def python_interpreter(code: str) -> str:
+    """Execute Python code and return the output."""
+    return st.python_interpreter(code)
 
 class LangChainAgent(BaseAgent):
     """LangChain AgentExecutor-based agent implementation."""
@@ -30,28 +49,7 @@ class LangChainAgent(BaseAgent):
         )
         
         # Create tools
-        self.tools = [
-            StructuredTool.from_function(
-                func=st.web_search,
-                description=st.web_search.__doc__,
-                args_schema=st.SearchInput
-            ),
-            StructuredTool.from_function(
-                func=st.read_webpage,
-                description=st.read_webpage.__doc__,
-                args_schema=st.BrowserInput
-            ),
-            StructuredTool.from_function(
-                func=st.inspect_file,
-                description=st.inspect_file.__doc__,
-                args_schema=st.FileToolInput
-            ),
-            StructuredTool.from_function(
-                func=st.python_interpreter,
-                description=st.python_interpreter.__doc__,
-                args_schema=st.PythonInput
-            ),
-        ]
+        self.tools = [web_search, read_webpage, inspect_file, python_interpreter]
         
         # Create the agent with prompt
         self.agent = self._build_agent()
@@ -62,27 +60,23 @@ class LangChainAgent(BaseAgent):
     
     def _build_agent(self) -> StateGraph:
         """Build the LangChain agent with AgentExecutor."""
-        prompt = ChatPromptTemplate.from_messages([
-            ("system", (
-                "You are a general AI assistant. I will ask you a question. "
-                "Report your thoughts, and finish your answer with the following template: "
-                "FINAL ANSWER: [YOUR FINAL ANSWER]. "
-                "YOUR FINAL ANSWER should be a number OR as few words as possible OR a comma separated list of numbers and/or strings. "
-                "If you are asked for a number, don't use comma to write your number neither use units such as $ or percent sign unless specified otherwise. "
-                "If you are asked for a string, don't use articles, neither abbreviations (e.g. for cities), and write the digits in plain text unless specified otherwise. "
-                "If you are asked for a comma separated list, apply the above rules depending of whether the element to be put in the list is a number or a string.\n\n"
-                "Use the available tools when needed to gather information and solve problems."
-            )),
-            ("human", "{input}"),
-            MessagesPlaceholder(variable_name="agent_scratchpad"),
-        ])
+        prompt = \
+                "You are a general AI assistant. I will ask you a question. "\
+                "Report your thoughts, and finish your answer with the following template: "\
+                "FINAL ANSWER: [YOUR FINAL ANSWER]. "\
+                "YOUR FINAL ANSWER should be a number OR as few words as possible OR a comma separated list of numbers and/or strings. "\
+                "If you are asked for a number, don't use comma to write your number neither use units such as $ or percent sign unless specified otherwise. "\
+                "If you are asked for a string, don't use articles, neither abbreviations (e.g. for cities), and write the digits in plain text unless specified otherwise. "\
+                "If you are asked for a comma separated list, apply the above rules depending of whether the element to be put in the list is a number or a string.\n\n"\
+                "Use the available tools when needed to gather information and solve problems."\
+           
         
         return create_agent(model= self.llm,tools= self.tools,system_prompt= prompt)
 
 
 
     def run(self, question: str, file_paths: Optional[List[str]] = None) -> AgentResponse:
-        """Run agent on question."""
+        """Run agent on question."""        
         start_time = time.time()
         
         file_context = ""
@@ -91,12 +85,18 @@ class LangChainAgent(BaseAgent):
         
         full_question = f"{question}{file_context}"
         
+        # create_agent expects messages in the correct format
         result = self.agent.invoke(
-            {"input": full_question},
-            config={"callbacks": [langfuse_handler], "max_recursion_depth": 50}
+            {"messages": [HumanMessage(content=full_question)]},
+            config={"callbacks": [langfuse_handler], "recursion_limit": 50}
         )
         
-        answer = result.get("output", str(result))
+        # Extract answer from the messages
+        messages = result.get("messages", [])
+        if messages:
+            answer = messages[-1].content if hasattr(messages[-1], 'content') else str(messages[-1])
+        else:
+            answer = str(result)
         
         return AgentResponse(
             answer=answer,
