@@ -11,7 +11,7 @@ class AnswerGrader:
             model=model['model'],
             base_url=model['base_url'],
             api_key=model['api_key'],
-            temperature= 0,
+            temperature= 0.01,
         )
         
     def grade_answer(self, agent_answer: Optional[str], correct_answer: str, question: str) -> Dict:
@@ -77,7 +77,7 @@ The list of answers:
     {",\n".join(answers)}
 The grading summary:
     {json.dumps(grading_summary, indent=2)}
-Provide your assessment in a concise one or two sentence paragraph.
+Provide your assessment in a concise one or two sentence paragraph, take into account that the maximal accuracy achieved was about 0.5"
         """
         response = self.llm.invoke([{"role": "user", "content": prompt}])
         return response.content
