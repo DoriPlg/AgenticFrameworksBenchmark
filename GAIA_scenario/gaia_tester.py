@@ -45,6 +45,12 @@ except ImportError as e:
     print(f"Warning: LangGraph agent not available - {e}")
 
 try:
+    from gaia_agents.langchain_agent import LangChainAgent
+    AGENT_REGISTRY['langchain'] = LangChainAgent
+except ImportError as e:
+    print(f"Warning: LangChain agent not available - {e}")
+
+try:
     from gaia_agents.openai_agent import OpenAIAgent
     AGENT_REGISTRY['openai'] = OpenAIAgent
 except ImportError as e:
