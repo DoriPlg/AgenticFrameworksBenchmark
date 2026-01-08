@@ -66,3 +66,18 @@ JSON response:"""
                 "confidence": "uncertain",
                 "reasoning": f"Grading error: {str(e)}"
             }
+
+    def access_preformance(self, questions: Dict, grading_summary: Dict) -> str:
+        """Assess overall performance based on grading results and the answers given by the agent."""
+        answers = [question["agent_answer"] if question["agent_answer"] is not None else "No Answer"  for question in questions]
+        prompt = f"""
+Go over the list of answers an agent gave on questions, along with the grading result for the entire preformance.
+Give a literal summary of the agent's performance, including strengths, weaknesses and recurring pitfalls.
+The list of answers:
+    {",\n".join(answers)}
+The grading summary:
+    {json.dumps(grading_summary, indent=2)}
+Provide your assessment in a concise one or two sentence paragraph.
+        """
+        response = self.llm.invoke([{"role": "user", "content": prompt}])
+        return response.content
