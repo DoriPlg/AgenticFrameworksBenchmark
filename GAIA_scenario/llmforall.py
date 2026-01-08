@@ -37,7 +37,20 @@ def get_available_models(base_url: str = None) -> List[str]:
         print(f"Warning: Could not fetch models from {base_url}/llm/models: {e}")
         return []
 
-models= get_available_models()
+models= [
+    "Meta-Llama-3_3-70B-Instruct"
+    "Qwen2.5-Coder-32B-Instruct"
+    "DeepSeek-R1-Distill-Llama-70B"
+    "Mistral-Nemo-Instruct-2407"
+    "gpt-oss-20b"
+    "Qwen2.5-VL-72B-Instruct"
+    "Qwen3-32B"
+    "Llama-3.1-8B-Instruct"
+    "Mistral-Small-3.2-24B-Instruct-2506"
+    "Mixtral-8x7B-Instruct-v0.1"
+    "gpt-oss-120b"
+    "Mistral-7B-Instruct-v0.3"
+]
 # Load environment variables
 load_dotenv()
 
@@ -100,7 +113,7 @@ def get_llm_config(model_choice: int = 0) -> dict:
         dict: Configuration with model, base_url, and api_key
     """
     if model_choice >= len(models):
-        raise ValueError(f"Invalid model choice: {model_choice}")
+        raise ValueError(f"Invalid model choice: {model_choice}, only {len(models)} models available.")
     model = models[model_choice]
     
     # Special handling for Mistral
