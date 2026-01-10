@@ -78,7 +78,7 @@ class GradingPipeline:
         # Save graded results
         if output_path is None:
             input_path_obj = Path(input_path)
-            output_path = str(input_path_obj.parent / f"{input_path_obj.stem}_graded{input_path_obj.suffix}")
+            output_path = str(input_path_obj.parent / f"graded/{input_path_obj.stem}_graded{input_path_obj.suffix}")
         
         with open(output_path, 'w') as f:
             json.dump(graded_data, f, indent=2)
