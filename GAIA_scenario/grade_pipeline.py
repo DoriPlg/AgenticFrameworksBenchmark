@@ -110,5 +110,5 @@ if __name__ == "__main__":
     input_path = sys.argv[1]
     output_path = sys.argv[2] if len(sys.argv) > 2 else None
     
-    pipeline = GradingPipeline(grader_model=get_llm_config())
+    pipeline = GradingPipeline(grader_model=get_llm_config(10))
     pipeline.grade_comparison_file(input_path, output_path)
