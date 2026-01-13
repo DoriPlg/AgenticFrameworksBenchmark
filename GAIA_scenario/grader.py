@@ -30,8 +30,6 @@ class AnswerGrader:
         
         prompt = f"""You are grading an AI agent's answer to a question.
 
-Question: {question}
-
 Correct Answer: {correct_answer}
 
 Agent's Answer: {agent_answer}
