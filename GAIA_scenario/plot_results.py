@@ -40,10 +40,12 @@ class DisplayResults:
                 accuracy = summary.get("accuracy", 0)
                 correct_answers = summary.get("correct_answers", 0)
                 avg_time = framework_data.get("summary", {}).get("avg_execution_time", 0)
+                failed_runs = framework_data.get("summary", {}).get("failed_runs", 0)
                 performance[model][framework] = {
                     "accuracy": accuracy,
                     "correct_answers": correct_answers,
-                    "avg_execution_time": avg_time
+                    "avg_execution_time": avg_time,
+                    "failed_runs": failed_runs
                 }
         return performance
     
@@ -70,7 +72,7 @@ class DisplayResults:
         """
         performance = self.get_preformance()
         
-        for metric in ["accuracy", "correct_answers", "avg_execution_time"]:
+        for metric in ["accuracy", "correct_answers", "avg_execution_time","failed_runs"]:
             plt.figure(figsize=(10, 6))
             for model, frameworks in performance.items():
                 values = [frameworks[fw][metric] for fw in frameworks]
