@@ -57,8 +57,15 @@ except ImportError as e:
     print(f"Warning: OpenAI agent not available - {e}")
 
 
-def load_gaia_dataset():
-    """Load GAIA dataset from environment or cache."""
+def load_gaia_dataset(lvl=2):
+    """
+    Load GAIA dataset from environment or cache.
+    args:
+        lvl (int): Level of the GAIA dataset to load.
+    returns:
+        dataset: Loaded dataset object.
+        data_dir: Path to the dataset directory.
+    """
     data_dir = os.getenv("GAIA_DATA_DIR")
     if not data_dir:
         # Find in cache
@@ -71,7 +78,7 @@ def load_gaia_dataset():
     if not data_dir:
         raise RuntimeError("GAIA dataset not found. Run data_pull.py first.")
     
-    dataset = load_dataset(data_dir, "2023_level1", split="validation")
+    dataset = load_dataset(data_dir, f"2023_level{lvl}", split="validation")
     return dataset, data_dir
 
 
