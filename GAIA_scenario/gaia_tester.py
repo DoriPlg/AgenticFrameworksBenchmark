@@ -57,7 +57,7 @@ except ImportError as e:
     print(f"Warning: OpenAI agent not available - {e}")
 
 
-def load_gaia_dataset(lvl=2):
+def load_gaia_dataset(lvl):
     """
     Load GAIA dataset from environment or cache.
     args:
@@ -103,7 +103,7 @@ def run_test():
     
     # Load dataset
     print("Loading GAIA dataset...")
-    dataset, data_dir = load_gaia_dataset()
+    dataset, data_dir = load_gaia_dataset(lvl=3)
     print(f"✓ Loaded {len(dataset)} test examples\n")
     
     # Get model config
@@ -244,7 +244,7 @@ def compare_frameworks(dataset, data_dir, model_config, num_questions, start_idx
     
     # Save comparison
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = Path(output_dir) / f"comparison_{timestamp}.json"
+    filename = Path(output_dir) / f"comparison_{model_config['model']}_{timestamp}.json"
     
     with open(filename, 'w') as f:
         json.dump(all_results, f, indent=2)

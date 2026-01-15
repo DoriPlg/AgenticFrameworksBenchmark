@@ -17,7 +17,7 @@ class GradingPipeline:
         self.grader = AnswerGrader(model=grader_model)
         self.model_name = grader_model['model']
         
-    def grade_comparison_file(self, input_path: str, output_path: Optional[str] = None) -> Dict:
+    def grade_comparison_file(self, input_path: str, output_path: Optional[str] = None, subdir: str = "") -> Dict:
         """
         Grade all answers in a comparison JSON file.
         
@@ -78,7 +78,7 @@ class GradingPipeline:
         # Save graded results
         if output_path is None:
             input_path_obj = Path(input_path)
-            output_path = str(input_path_obj.parent / f"graded/{input_path_obj.stem}_graded{input_path_obj.suffix}")
+            output_path = str(input_path_obj.parent / f"graded/{subdir}{input_path_obj.stem}_graded{input_path_obj.suffix}")
         
         with open(output_path, 'w') as f:
             json.dump(graded_data, f, indent=2)
@@ -111,4 +111,4 @@ if __name__ == "__main__":
     output_path = sys.argv[2] if len(sys.argv) > 2 else None
     
     pipeline = GradingPipeline(grader_model=get_llm_config(10))
-    pipeline.grade_comparison_file(input_path, output_path)
+    pipeline.grade_comparison_file(input_path, output_path, subdir="lvl3/")
