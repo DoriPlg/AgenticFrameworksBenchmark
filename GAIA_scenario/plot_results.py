@@ -4,11 +4,12 @@ from pathlib import Path
 
 
 class DisplayResults:
-    def __init__(self):
+    def __init__(self, input_dir:str ="output/graded", output_dir: str = "output/summaries"):
+        self.output_dir = output_dir
+        self.input_dir = input_dir
         self.results = self.get_results()
 
-    @staticmethod
-    def get_results(directory: str= "output/graded") -> dict:
+    def get_results(self) -> dict:
         """
         Docstring for get_results
         
@@ -18,7 +19,7 @@ class DisplayResults:
         :rtype: dict
         """
         results = {}
-        for file in Path(directory).glob("*.json"):
+        for file in Path(self.input_dir).glob("*.json"):
             with open(file, 'r') as f:
                 data = json.load(f)
                 model = file.stem.split('_')[1]
@@ -64,7 +65,7 @@ class DisplayResults:
                 literary_details[model+" X " + framework] = details
         return literary_details
     
-    def plot_performance(self):
+    def save_plot_performance(self):
         """
         plots the performance metrics for each model
         
@@ -84,10 +85,10 @@ class DisplayResults:
             plt.xticks(rotation=45, ha='right')
             plt.legend()
             plt.tight_layout()
-            plt.savefig(f'output/summaries/{metric}_performance.png')
+            plt.savefig(f'{self.output_dir}/{metric}_performance.png')
             plt.close()
 
-    def save_description(self, output_file: str = "output/summaries/literary_details.json"):
+    def save_description(self):
         """
         saves the literary details to a single JSON file
         
@@ -95,11 +96,12 @@ class DisplayResults:
         :type output_file: str
         :return: None
         """
+        output_file = f"{self.output_dir}/litereary_details.json"
         with open(output_file, 'w') as f:
             json.dump(self.get_literary_details(), f, indent=2)
         print(f"Literary details saved to {output_file}")
 
 if __name__ == "__main__":
-    display = DisplayResults()
-    display.plot_performance()
+    display = DisplayResults("output/graded/lvl3", "output/summaries/lvl3")
+    display.save_plot_performance()
     display.save_description()
