@@ -91,6 +91,7 @@ def run_test():
     start_idx = int(os.getenv("START_IDX", "0"))
     output_dir = os.getenv("OUTPUT_DIR", "/app/output")
     test_mode = os.getenv("TEST_MODE", "single")  # single or compare
+    temperature = float(os.getenv("TEMPERATURE", "0.0"))
     
     print(f"\n{'='*80}")
     print(f"GAIA BENCHMARK TEST")
@@ -99,6 +100,7 @@ def run_test():
     print(f"Model Number: {model_idx}")
     print(f"Questions: {num_questions} (starting at {start_idx})")
     print(f"Test Mode: {test_mode}")
+    print(f"Temperature: {temperature}")
     print(f"{'='*80}\n")
     
     # Load dataset
@@ -116,20 +118,20 @@ def run_test():
         # Compare all available frameworks
         results = compare_frameworks(
             dataset, data_dir, model_config,
-            num_questions, start_idx, output_dir
+            num_questions, start_idx, output_dir, temperature
         )
     else:
         # Single framework test
         results = test_single_framework(
             framework, dataset, data_dir, model_config,
-            num_questions, start_idx, output_dir
+            num_questions, start_idx, output_dir, temperature
         )
     
     return results
 
 
 def test_single_framework(framework, dataset, data_dir, model_config, 
-                          num_questions, start_idx, output_dir):
+                          num_questions, start_idx, output_dir, temperature=0.0):
     """Test a single framework."""
     if framework not in AGENT_REGISTRY:
         print(f"ERROR: Framework '{framework}' not available.")
@@ -138,7 +140,7 @@ def test_single_framework(framework, dataset, data_dir, model_config,
     
     # Create agent
     AgentClass = AGENT_REGISTRY[framework]
-    agent = AgentClass(model_config, verbose=False)
+    agent = AgentClass(model_config, verbose=False, temperature=temperature)
     
     print(f"Testing: {agent.name}\n")
     
@@ -225,7 +227,7 @@ def test_single_framework(framework, dataset, data_dir, model_config,
     return results
 
 
-def compare_frameworks(dataset, data_dir, model_config, num_questions, start_idx, output_dir):
+def compare_frameworks(dataset, data_dir, model_config, num_questions, start_idx, output_dir, temperature=0.0):
     """Compare all available frameworks."""
     print(f"Comparing {len(AGENT_REGISTRY)} frameworks...\n")
     
@@ -238,7 +240,7 @@ def compare_frameworks(dataset, data_dir, model_config, num_questions, start_idx
         
         results = test_single_framework(
             framework_name, dataset, data_dir, model_config,
-            num_questions, start_idx, output_dir
+            num_questions, start_idx, output_dir, temperature
         )
         all_results[framework_name] = results
     
