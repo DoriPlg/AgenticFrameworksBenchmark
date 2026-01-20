@@ -2,7 +2,7 @@ import os
 import asyncio
 
 from agents import Agent, Runner, OpenAIChatCompletionsModel, AsyncOpenAI, OpenAIChatCompletionsModel, function_tool, memory, trace, SQLiteSession, RunContextWrapper
-from llmforall import get_llm_config
+from GAIA_scenario.llmforall import get_llm_config
 
 
 # --- Langfuse Setup ---
