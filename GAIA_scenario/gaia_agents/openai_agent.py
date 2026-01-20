@@ -2,7 +2,7 @@
 from typing import Dict, Any, Optional, List
 import time
 import asyncio
-from agents import Agent, Runner, OpenAIChatCompletionsModel, AsyncOpenAI, function_tool, SQLiteSession
+from agents import Agent, Runner, OpenAIChatCompletionsModel, AsyncOpenAI, function_tool, SQLiteSession, ModelSettings
 from agents.run import RunContextWrapper
 
 from langfuse import get_client
@@ -19,7 +19,7 @@ langfuse = get_client()
 class OpenAIAgent(BaseAgent):
     """OpenAI Agents framework-based agent implementation."""
     
-    def __init__(self, model_config: Dict[str, Any], verbose: bool = False):
+    def __init__(self, model_config: Dict[str, Any], verbose: bool = False, temperature: float = 0.0):
         super().__init__(model_config, verbose)
         
         self.model = OpenAIChatCompletionsModel(
@@ -28,6 +28,9 @@ class OpenAIAgent(BaseAgent):
                 base_url=model_config['base_url'],
                 api_key=model_config['api_key']
             )
+        )
+        self.model_settings = ModelSettings(
+            temperature=temperature
         )
         
         # Create tools using function_tool decorator
@@ -56,6 +59,7 @@ class OpenAIAgent(BaseAgent):
             name="research_agent",
             instructions=system_prompt,
             tools=self.tools,
+            model_settings=self.model_settings,
         )
         
         return agent
@@ -64,9 +68,8 @@ class OpenAIAgent(BaseAgent):
         """Run agent on question."""
         start_time = time.time()
         
-        file_context = ""
-        if file_paths:
-            file_context = f"\n\nATTACHED FILES: {', '.join(file_paths)}\nYou MUST inspect these files if relevant."
+        file_context = f"\n\nATTACHED FILES: {', '.join(file_paths)}\nYou MUST inspect these files if relevant." \
+            if file_paths else ""
         
         full_question = f"{question}{file_context}"
         
