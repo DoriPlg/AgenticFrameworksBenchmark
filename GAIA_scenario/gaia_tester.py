@@ -103,7 +103,7 @@ def run_test():
     
     # Load dataset
     print("Loading GAIA dataset...")
-    dataset, data_dir = load_gaia_dataset(lvl=3)
+    dataset, data_dir = load_gaia_dataset(lvl=1)
     print(f"✓ Loaded {len(dataset)} test examples\n")
     
     # Get model config
@@ -115,7 +115,7 @@ def run_test():
     if test_mode == "compare":
         # Compare all available frameworks
         results = compare_frameworks(
-            dataset, data_dir, model_config, 
+            dataset, data_dir, model_config,
             num_questions, start_idx, output_dir
         )
     else:
