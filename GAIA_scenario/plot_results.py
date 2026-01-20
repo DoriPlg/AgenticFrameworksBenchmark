@@ -101,7 +101,68 @@ class DisplayResults:
             json.dump(self.get_literary_details(), f, indent=2)
         print(f"Literary details saved to {output_file}")
 
+    def plot_together(self, united_file: str):
+        """
+        plots all performance metrics together in a single plot
+        
+        :param united_file: the file to save the united plot
+        :type united_file: str
+        :return: None
+        """
+        data = {}
+        with open(united_file, 'r') as f:
+            data = json.load(f)
+        # Prepare data for stacked bar chart
+        models = list(data.keys())
+        frameworks = set()
+        for model_data in data.values():
+            frameworks.update(model_data.keys())
+        frameworks = sorted(list(frameworks))
+
+        # Set up the plot
+        fig, ax = plt.subplots(figsize=(12, 7))
+        width = 0.8
+        colors = ["#32935a", "#a77729", "#982f24"]  # green, orange, red for levels 1, 2, 3
+
+        # Create x positions for each model-framework combination
+        combinations = []
+        x_positions = []
+        pos = 0
+        
+        for model in models:
+            for framework in frameworks:
+                combinations.append(f"{model}\n{framework}")
+                x_positions.append(pos)
+                pos += 1
+            pos += 1.5  # Add gap between different models
+
+        # Plot stacked bars for each combination
+        for i, (model, framework) in enumerate([(m, f) for m in models for f in frameworks]):
+            level_1 = data[model].get(framework, {}).get("1", 0)
+            level_2 = data[model].get(framework, {}).get("2", 0)
+            level_3 = data[model].get(framework, {}).get("3", 0)
+
+            ax.bar(x_positions[i], level_1, width, 
+               label='Level 1' if i == 0 else '', color=colors[0], alpha=0.8)
+            ax.bar(x_positions[i], level_2, width, bottom=level_1,
+               label='Level 2' if i == 0 else '', color=colors[1], alpha=0.8)
+            ax.bar(x_positions[i], level_3, width,
+               bottom=level_1 + level_2,
+               label='Level 3' if i == 0 else '', color=colors[2], alpha=0.8)
+
+        ax.set_xlabel('Model - Framework', fontsize=12)
+        ax.set_ylabel('Number of Correct Answers', fontsize=12)
+        ax.set_title('Model Performance by Framework and Difficulty Level', fontsize=14)
+        ax.set_xticks(x_positions)
+        ax.set_xticklabels(combinations, rotation=45, ha='right', fontsize=9)
+        ax.legend(title='Levels', loc='upper left')
+        plt.tight_layout()
+        plt.savefig(f'{self.output_dir}/stacked_performance.png', dpi=300)
+        plt.close()
+        print(f"Stacked performance plot saved to {self.output_dir}/stacked_performance.png")
+
 if __name__ == "__main__":
     display = DisplayResults("output/graded/lvl3", "output/summaries/lvl3")
+    # display.plot_together("output/connected_comparisons_20260120_160212.json")
     display.save_plot_performance()
     display.save_description()
