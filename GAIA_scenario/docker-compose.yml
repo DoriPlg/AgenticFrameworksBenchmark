@@ -19,6 +19,7 @@ services:
       - START_IDX=${START_IDX:-0}
       - TEST_MODE=${TEST_MODE:-single}
       - TEMPERATURE=${TEMPERATURE:-0.0}
+      - TEST_LEVEL=${TEST_LEVEL:-1}
       - OUTPUT_DIR=${OUTPUT_DIR:-/app/output}
       # Suppress Pydantic serialization warnings (non-critical)
       - PYTHONWARNINGS=ignore::UserWarning:pydantic

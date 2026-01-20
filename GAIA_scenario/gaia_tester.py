@@ -92,6 +92,7 @@ def run_test():
     output_dir = os.getenv("OUTPUT_DIR", "/app/output")
     test_mode = os.getenv("TEST_MODE", "single")  # single or compare
     temperature = float(os.getenv("TEMPERATURE", "0.0"))
+    test_level = int(os.getenv("TEST_LEVEL", "1"))
     
     print(f"\n{'='*80}")
     print(f"GAIA BENCHMARK TEST")
@@ -105,7 +106,7 @@ def run_test():
     
     # Load dataset
     print("Loading GAIA dataset...")
-    dataset, data_dir = load_gaia_dataset(lvl=1)
+    dataset, data_dir = load_gaia_dataset(lvl=test_level)
     print(f"✓ Loaded {len(dataset)} test examples\n")
     
     # Get model config
