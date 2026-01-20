@@ -15,7 +15,7 @@ from langchain_community.utilities import GoogleSerperAPIWrapper
 
 
 # --- LLM & Tracing Setup ---
-from llmforall import get_llm_config
+from GAIA_scenario.llmforall import get_llm_config
 from langfuse.langchain import CallbackHandler
 
 from shared_tools import *
