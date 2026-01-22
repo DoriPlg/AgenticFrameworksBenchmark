@@ -23,10 +23,10 @@ class OpenAIAgent(BaseAgent):
         super().__init__(model_config, verbose, temperature)
         
         self.model = OpenAIChatCompletionsModel(
-            model=self.agentmodel_config['model'],
+            model=self.model_config['model'],
             openai_client=AsyncOpenAI(
-                base_url=self.odel_config['base_url'],
-                api_key=self.del_config['api_key']
+                base_url=self.model_config['base_url'],
+                api_key=self.model_config['api_key']
             )
         )
         self.model_settings = ModelSettings(
