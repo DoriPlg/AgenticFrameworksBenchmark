@@ -1,12 +1,13 @@
-import matplotlib.pyplot as plt
-import json
 from pathlib import Path
+import json
+import sys
+import matplotlib.pyplot as plt
 
 
 class DisplayResults:
-    def __init__(self, input_dir:str ="output/graded", output_dir: str = "output/summaries"):
-        self.output_dir = output_dir
-        self.input_dir = input_dir
+    def __init__(self, input_dir:str ="output/graded", output_dir: str = "output/summaries", dir: str =""):
+        self.output_dir = output_dir + "/" + dir
+        self.input_dir = input_dir + "/" + dir
         self.results = self.get_results()
 
     def get_results(self) -> dict:
@@ -19,11 +20,15 @@ class DisplayResults:
         :rtype: dict
         """
         results = {}
+        model_views = {}
         for file in Path(self.input_dir).glob("*.json"):
             with open(file, 'r') as f:
                 data = json.load(f)
                 model = file.stem.split('_')[1]
-                results[model] = data
+                if model not in model_views:
+                    model_views[model] = 0
+                model_views[model] += 1
+                results[model + f" take-{model_views[model]}"] = data
         return results
 
     def get_preformance(self) -> dict:
@@ -75,15 +80,30 @@ class DisplayResults:
         
         for metric in ["accuracy", "correct_answers", "avg_execution_time","failed_runs"]:
             plt.figure(figsize=(10, 6))
-            for model, frameworks in performance.items():
-                values = [frameworks[fw][metric] for fw in frameworks]
-                plt.bar([f"{model} - {fw}" for fw in frameworks], values, label=model)
+            # Define unique colors for each model
+            model_colors = {
+                'gpt-oss-120b': '#1f77b4',  # blue
+                'gpt-oss-20b': '#ff7f0e',   # orange
+                'Meta-Llama-3': '#2ca02c',        # green
+                'Mistral-Small-3.2-24B-Instruct-2506': '#d62728'           # red
+            }
             
+            for model in sorted(performance.keys()):
+                frameworks = performance[model]
+                sorted_frameworks = sorted(frameworks.keys())
+                values = [frameworks[fw][metric] for fw in sorted_frameworks]
+                
+                # Extract base model name (remove " take-X" suffix)
+                base_model = model.split(' take-')[0]
+                color = model_colors.get(base_model, '#7f7f7f')  # default gray if model not found
+                
+                plt.bar([f"{model} - {fw}" for fw in sorted_frameworks], values, 
+                       label=model, color=color)
+
             plt.title(f'Model Performance: {metric.replace("_", " ").title()}')
             plt.xlabel('Model - Framework')
             plt.ylabel(metric.replace("_", " ").title())
             plt.xticks(rotation=45, ha='right')
-            plt.legend()
             plt.tight_layout()
             plt.savefig(f'{self.output_dir}/{metric}_performance.png')
             plt.close()
@@ -113,7 +133,7 @@ class DisplayResults:
         with open(united_file, 'r') as f:
             data = json.load(f)
         # Prepare data for stacked bar chart
-        models = list(data.keys())
+        models = sorted(list(data.keys()))
         frameworks = set()
         for model_data in data.values():
             frameworks.update(model_data.keys())
@@ -162,7 +182,8 @@ class DisplayResults:
         print(f"Stacked performance plot saved to {self.output_dir}/stacked_performance.png")
 
 if __name__ == "__main__":
-    display = DisplayResults("output/graded/lvl3", "output/summaries/lvl3")
+    dir = sys.argv[1]
+    display = DisplayResults(dir=dir)
     # display.plot_together("output/connected_comparisons_20260120_160212.json")
     display.save_plot_performance()
     display.save_description()
