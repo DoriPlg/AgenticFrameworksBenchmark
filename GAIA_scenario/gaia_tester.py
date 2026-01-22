@@ -81,6 +81,11 @@ def load_gaia_dataset(lvl):
     dataset = load_dataset(data_dir, f"2023_level{lvl}", split="validation")
     return dataset, data_dir
 
+SKIPS= {
+        1:[4, 7, 9, 16, 22, 24, 26, 27, 29, 31],
+        2:[4],
+        3:[1, 2, 6, 8]
+        }
 
 def run_test():
     """Main test function driven by environment variables."""
@@ -119,20 +124,20 @@ def run_test():
         # Compare all available frameworks
         results = compare_frameworks(
             dataset, data_dir, model_config,
-            num_questions, start_idx, output_dir, temperature
+            num_questions, start_idx, output_dir, temperature, test_level
         )
     else:
         # Single framework test
         results = test_single_framework(
             framework, dataset, data_dir, model_config,
-            num_questions, start_idx, output_dir, temperature
+            num_questions, start_idx, output_dir, temperature, test_level
         )
     
     return results
 
 
 def test_single_framework(framework, dataset, data_dir, model_config, 
-                          num_questions, start_idx, output_dir, temperature=0.0):
+                          num_questions, start_idx, output_dir, temperature=0.0, test_level=1):
     """Test a single framework."""
     if framework not in AGENT_REGISTRY:
         print(f"ERROR: Framework '{framework}' not available.")
@@ -156,14 +161,21 @@ def test_single_framework(framework, dataset, data_dir, model_config,
         "test_config": {
             "num_questions": num_questions,
             "start_idx": start_idx,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
+            "level": test_level
         },
         "questions": []
     }
     
-    end_idx = min(start_idx + num_questions, len(dataset))
+    skip_count = 0
+    for j in range(num_questions):
+        while (start_idx + j + skip_count) in SKIPS[test_level]:
+            skip_count += 1
+    end_idx = min(start_idx + num_questions + skip_count, len(dataset))
     
     for idx in range(start_idx, end_idx):
+        if idx in SKIPS[test_level]:
+            continue
         example = dataset[idx]
         question = example["Question"]
         correct_answer = example.get("Final answer", "")
@@ -229,7 +241,8 @@ def test_single_framework(framework, dataset, data_dir, model_config,
     return results
 
 
-def compare_frameworks(dataset, data_dir, model_config, num_questions, start_idx, output_dir, temperature=0.0):
+def compare_frameworks(dataset, data_dir, model_config, num_questions, 
+                       start_idx, output_dir, temperature=0.0, test_level=1):
     """Compare all available frameworks."""
     print(f"Comparing {len(AGENT_REGISTRY)} frameworks...\n")
     
@@ -242,7 +255,7 @@ def compare_frameworks(dataset, data_dir, model_config, num_questions, start_idx
         
         results = test_single_framework(
             framework_name, dataset, data_dir, model_config,
-            num_questions, start_idx, output_dir, temperature
+            num_questions, start_idx, output_dir, temperature, test_level
         )
         all_results[framework_name] = results
     
