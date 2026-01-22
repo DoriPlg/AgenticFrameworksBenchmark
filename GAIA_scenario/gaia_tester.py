@@ -32,23 +32,23 @@ def register_agent(name):
     return decorator
 
 # Import and register agents
-try:
-    from gaia_agents.crewai_agent import CrewAIAgent
-    AGENT_REGISTRY['crewai'] = CrewAIAgent
-except ImportError as e:
-    print(f"Warning: CrewAI agent not available - {e}")
+# try:
+#     from gaia_agents.crewai_agent import CrewAIAgent
+#     AGENT_REGISTRY['crewai'] = CrewAIAgent
+# except ImportError as e:
+#     print(f"Warning: CrewAI agent not available - {e}")
+
+# try:
+#     from gaia_agents.langchain_agent import LangChainAgent
+#     AGENT_REGISTRY['langchain'] = LangChainAgent
+# except ImportError as e:
+#     print(f"Warning: LangChain agent not available - {e}")
 
 try:
     from gaia_agents.langgraph_agent import LangGraphAgent
     AGENT_REGISTRY['langgraph'] = LangGraphAgent
 except ImportError as e:
     print(f"Warning: LangGraph agent not available - {e}")
-
-try:
-    from gaia_agents.langchain_agent import LangChainAgent
-    AGENT_REGISTRY['langchain'] = LangChainAgent
-except ImportError as e:
-    print(f"Warning: LangChain agent not available - {e}")
 
 try:
     from gaia_agents.openai_agent import OpenAIAgent
@@ -143,14 +143,15 @@ def test_single_framework(framework, dataset, data_dir, model_config,
     AgentClass = AGENT_REGISTRY[framework]
     agent = AgentClass(model_config, verbose=False, temperature=temperature)
     
-    print(f"Testing: {agent.name}\n")
+    print(f"Testing: {agent._name}\n")
     
     # Run tests
     results = {
         "agent_info": {
-            "name": agent.name,
+            "name": agent._name,
             "framework": framework,
-            "model": model_config["model"],
+            "model": agent.model_config["model"],
+            "temperature": agent.temperature
         },
         "test_config": {
             "num_questions": num_questions,
