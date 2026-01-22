@@ -175,6 +175,7 @@ def test_single_framework(framework, dataset, data_dir, model_config,
     
     for idx in range(start_idx, end_idx):
         if idx in SKIPS[test_level]:
+            print(f"\n[{idx+1}/{len(dataset)}] Skipping question {idx} as per SKIPS list...")
             continue
         example = dataset[idx]
         question = example["Question"]
