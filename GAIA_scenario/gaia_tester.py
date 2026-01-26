@@ -32,17 +32,17 @@ def register_agent(name):
     return decorator
 
 # Import and register agents
-# try:
-#     from gaia_agents.crewai_agent import CrewAIAgent
-#     AGENT_REGISTRY['crewai'] = CrewAIAgent
-# except ImportError as e:
-#     print(f"Warning: CrewAI agent not available - {e}")
+try:
+    from gaia_agents.crewai_agent import CrewAIAgent
+    AGENT_REGISTRY['crewai'] = CrewAIAgent
+except ImportError as e:
+    print(f"Warning: CrewAI agent not available - {e}")
 
-# try:
-#     from gaia_agents.langchain_agent import LangChainAgent
-#     AGENT_REGISTRY['langchain'] = LangChainAgent
-# except ImportError as e:
-#     print(f"Warning: LangChain agent not available - {e}")
+try:
+    from gaia_agents.langchain_agent import LangChainAgent
+    AGENT_REGISTRY['langchain'] = LangChainAgent
+except ImportError as e:
+    print(f"Warning: LangChain agent not available - {e}")
 
 try:
     from gaia_agents.langgraph_agent import LangGraphAgent
