@@ -36,16 +36,42 @@ def web_search(query: str) -> str:
 class BrowserInput(BaseModel):
     url: str = Field(description="The URL of the webpage to read.")
 
+# Blacklisted domains/patterns to prevent accessing answer keys
+BLACKLISTED_PATTERNS = [
+    'huggingface.co/datasets/gaia-benchmark',
+    'huggingface.co/spaces/gaia-benchmark',
+    'github.com/gaia-benchmark',
+    'paperswithcode.com/dataset/gaia',
+    # Add any leaderboard or answer discussion pages
+    'reddit.com/r/MachineLearning.*gaia',
+    'github.com.*gaia.*answer',
+    'gaia.*validation.*json',
+    'gaia.*test.*json',
+]
+
+def is_url_blacklisted(url: str) -> bool:
+    """Check if URL matches any blacklisted pattern."""
+    import re
+    url_lower = url.lower()
+    for pattern in BLACKLISTED_PATTERNS:
+        if re.search(pattern.lower(), url_lower):
+            return True
+    return False
+
 def read_webpage(url: str) -> str:
     """
     Visit a specific URL and extract its text content. 
     Use this after searching to get details.
     """
+    # Check blacklist
+    if is_url_blacklisted(url):
+        return "ERROR: Access to this URL is blocked as it may contain validation data."
+    
     try:
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
         response = requests.get(url, headers=headers, timeout=10)
         soup = BeautifulSoup(response.content, 'html.parser')
-        
+        # ... rest of code
         # Remove script/style elements for cleanliness
         for script in soup(["script", "style", "nav", "footer"]):
             script.decompose()

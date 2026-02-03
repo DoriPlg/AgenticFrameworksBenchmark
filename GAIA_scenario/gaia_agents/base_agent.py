@@ -16,7 +16,7 @@ class AgentResponse:
 class BaseAgent(ABC):
     """Abstract base class that all agent implementations must inherit from."""
     
-    def __init__(self, model_config: Dict[str, Any], verbose: bool = False):
+    def __init__(self, model_config: Dict[str, Any], verbose: bool = False, temperature: float = 0.0):
         """
         Initialize the agent.
         
@@ -27,6 +27,7 @@ class BaseAgent(ABC):
         self.model_config = model_config
         self.verbose = verbose
         self._name = None
+        self.temperature = temperature
     
     @property
     @abstractmethod
