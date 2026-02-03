@@ -228,6 +228,10 @@ if __name__ == "__main__":
                 print(f"\n{'='*60}")
                 print(f"Processing: {json_file.name}")
                 print('='*60)
+                if output_path:
+                    output_dir = Path(output_path)
+                    if not Path(output_dir).exists():
+                        Path(output_dir).mkdir(parents=True, exist_ok=True)
                 try:
                     pipeline.grade_comparison_file(str(json_file), output_path)
                 except Exception as e:
