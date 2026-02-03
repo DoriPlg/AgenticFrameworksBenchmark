@@ -25,14 +25,15 @@ class LangGraphAgent(BaseAgent):
     """LangGraph-based agent implementation."""
     
     def __init__(self, model_config: Dict[str, Any], verbose: bool = False, temperature: float = 0.0):
-        super().__init__(model_config, verbose)
+        super().__init__(model_config, verbose, temperature)
         
         self.llm = ChatOpenAI(
-            model=model_config['model'],
-            base_url=model_config['base_url'],
-            api_key=model_config['api_key'],
-            temperature=temperature
+            model=self.model_config['model'],
+            base_url=self.model_config['base_url'],
+            api_key=self.model_config['api_key'],
+            temperature=self.temperature
         )
+        self._name = f"LangGraph-{self.model_config['model']}"
         
         # Create tools
         self.tools = [

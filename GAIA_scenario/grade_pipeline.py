@@ -70,21 +70,29 @@ class GradingPipeline:
         
         return summary
     
-    def _save_results(self, data: Dict, input_path: str, output_path: Optional[str], subdir: str = "") -> str:
+    def _save_results(self, data: Dict, input_path: str, output_dir: Optional[str], subdir: str = "") -> str:
         """Save graded results to file."""
-        if output_path is None:
+        if output_dir is None:
             input_path_obj = Path(input_path)
             if subdir:
-                output_path = str(input_path_obj.parent / f"graded/{subdir}{input_path_obj.stem}_graded{input_path_obj.suffix}")
+                output_dir = str(input_path_obj.parent / f"graded/{subdir}{input_path_obj.stem}_graded{input_path_obj.suffix}")
             else:
-                output_path = str(input_path_obj.parent / f"{input_path_obj.stem}_graded{input_path_obj.suffix}")
+                output_dir = str(input_path_obj.parent / f"{input_path_obj.stem}_graded{input_path_obj.suffix}")
         
-        Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+        else:
+            output_path_obj = Path(output_dir)
+            if output_path_obj.is_dir():
+                if subdir:
+                    output_dir = str(output_path_obj / f"graded/{subdir}{Path(input_path).stem}_graded{Path(input_path).suffix}")
+                else:
+                    output_dir = str(output_path_obj / f"{Path(input_path).stem}_graded{Path(input_path).suffix}")
+            else:
+                output_dir = str(output_path_obj)
         
-        with open(output_path, 'w') as f:
+        with open(output_dir, 'w') as f:
             json.dump(data, f, indent=2)
         
-        return output_path
+        return output_dir
         
     def grade_comparison_file(self, input_path: str, output_path: Optional[str] = None, subdir: str = "") -> Dict:
         """
@@ -201,5 +209,30 @@ if __name__ == "__main__":
     else:
         # Default to comparison mode
         pipeline = GradingPipeline(grader_model=get_llm_config(10))
-        subdir = "lvl3/"  # You may want to make this configurable
-        pipeline.grade_comparison_file(input_path, output_path, subdir)
+        if input_path.endswith(".json"):
+            pipeline.grade_comparison_file(input_path, output_path)
+        else:
+            # Input is a directory - process all JSON files
+            input_dir = Path(input_path)
+            if not input_dir.is_dir():
+                print(f"Error: {input_path} is not a valid file or directory")
+                sys.exit(1)
+
+            json_files = list(input_dir.glob("*.json"))
+            if not json_files:
+                print(f"No JSON files found in {input_path}")
+                sys.exit(1)
+
+            print(f"Found {len(json_files)} JSON files to process")
+            for json_file in json_files:
+                print(f"\n{'='*60}")
+                print(f"Processing: {json_file.name}")
+                print('='*60)
+                if output_path:
+                    output_dir = Path(output_path)
+                    if not Path(output_dir).exists():
+                        Path(output_dir).mkdir(parents=True, exist_ok=True)
+                try:
+                    pipeline.grade_comparison_file(str(json_file), output_path)
+                except Exception as e:
+                    print(f"Error processing {json_file.name}: {str(e)}")

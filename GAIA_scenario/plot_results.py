@@ -1,12 +1,15 @@
-import matplotlib.pyplot as plt
-import json
 from pathlib import Path
+import json
+import sys
+import matplotlib.pyplot as plt
 
 
 class DisplayResults:
-    def __init__(self, input_dir:str ="output/graded", output_dir: str = "output/summaries"):
-        self.output_dir = output_dir
-        self.input_dir = input_dir
+    def __init__(self, input_dir:str ="output/graded", output_dir: str = "output/summaries", dir: str =""):
+        self.output_dir = output_dir + "/" + dir
+        if not Path(self.output_dir).exists():
+            Path(self.output_dir).mkdir(parents=True, exist_ok=True)
+        self.input_dir = input_dir + "/" + dir
         self.results = self.get_results()
 
     def get_results(self) -> dict:
@@ -23,7 +26,10 @@ class DisplayResults:
             with open(file, 'r') as f:
                 data = json.load(f)
                 model = file.stem.split('_')[1]
-                results[model] = data
+                for framework, framework_data in data.items():
+                    if f"{model} X {framework}" not in results:
+                        results[f"{model} X {framework}"] = []
+                    results[f"{model} X {framework}"].append(framework_data)
         return results
 
     def get_preformance(self) -> dict:
@@ -34,20 +40,19 @@ class DisplayResults:
         :rtype: dict
         """
         performance = {}
-        for model, data in self.results.items():
-            performance[model] = {}
-            for framework, framework_data in data.items():
-                summary = framework_data.get("grading_summary", {})
-                accuracy = summary.get("accuracy", 0)
-                correct_answers = summary.get("correct_answers", 0)
-                avg_time = framework_data.get("summary", {}).get("avg_execution_time", 0)
-                failed_runs = framework_data.get("summary", {}).get("failed_runs", 0)
-                performance[model][framework] = {
-                    "accuracy": accuracy,
-                    "correct_answers": correct_answers,
-                    "avg_execution_time": avg_time,
-                    "failed_runs": failed_runs
-                }
+        for agent, data in self.results.items():
+            performance[agent] = {}
+            summary = [dat["grading_summary"] for dat in data]
+            accuracy = [summ.get("accuracy", 0) for summ in summary]
+            correct_answers = [sum.get("correct_answers", 0) for sum in summary]
+            avg_time = [summ.get("summary", {}).get("avg_execution_time", 0) for summ in data]
+            failed_runs = [summ.get("summary", {}).get("failed_runs", 0) for summ in data]
+            performance[agent] = {
+                "accuracy": accuracy,
+                "correct_answers": correct_answers,
+                "avg_execution_time": avg_time,
+                "failed_runs": failed_runs
+            }
         return performance
     
     def get_literary_details(self) -> dict:
@@ -58,11 +63,10 @@ class DisplayResults:
         :rtype: dict
         """
         literary_details = {}
-        for model, data in self.results.items():
-            for framework, framework_data in data.items():
-                summary = framework_data.get("grading_summary", {})
-                details = summary.get("literary_details", {})
-                literary_details[model+" X " + framework] = details
+        for agent, agent_data in self.results.items():
+            summary = agent_data.get("grading_summary", {})
+            details = [summ.get("literary_details", {}) for summ in summary]
+            literary_details[agent] = details
         return literary_details
     
     def save_plot_performance(self):
@@ -72,18 +76,39 @@ class DisplayResults:
         :return: None
         """
         performance = self.get_preformance()
-        
+
         for metric in ["accuracy", "correct_answers", "avg_execution_time","failed_runs"]:
             plt.figure(figsize=(10, 6))
-            for model, frameworks in performance.items():
-                values = [frameworks[fw][metric] for fw in frameworks]
-                plt.bar([f"{model} - {fw}" for fw in frameworks], values, label=model)
+            # Define unique colors for each model
+            model_colors = {
+                'gpt-oss-120b': '#1f77b4',  # blue
+                'gpt-oss-20b': '#ff7f0e',   # orange
+                'Meta-Llama-3': '#2ca02c',        # green
+                'Mistral-Small-3.2-24B-Instruct-2506': '#d62728'           # red
+            }
+
+            agents = sorted(performance.keys())
             
+            # Check if any metric is a list with length > 1
+            has_multiple_values = any(len(performance[agent][metric]) > 1 for agent in agents)
+            
+            if has_multiple_values:
+                # Use box chart for multiple values
+                print(f"Plotting boxplot for metric: {metric}")
+                data_to_plot = [performance[agent][metric] for agent in agents]
+                plt.boxplot(data_to_plot, labels=agents, positions=range(len(agents)))
+            else:
+                # Use bar chart for single values
+                for agent in agents:
+                    agent_data = performance[agent]
+                    base_model = agent.split(' ')[0]
+                    color = model_colors.get(base_model, '#7f7f7f')
+                    plt.bar(agent, agent_data[metric], label=agent, color=color)
+
             plt.title(f'Model Performance: {metric.replace("_", " ").title()}')
             plt.xlabel('Model - Framework')
             plt.ylabel(metric.replace("_", " ").title())
             plt.xticks(rotation=45, ha='right')
-            plt.legend()
             plt.tight_layout()
             plt.savefig(f'{self.output_dir}/{metric}_performance.png')
             plt.close()
@@ -113,7 +138,7 @@ class DisplayResults:
         with open(united_file, 'r') as f:
             data = json.load(f)
         # Prepare data for stacked bar chart
-        models = list(data.keys())
+        models = sorted(list(data.keys()))
         frameworks = set()
         for model_data in data.values():
             frameworks.update(model_data.keys())
@@ -162,7 +187,8 @@ class DisplayResults:
         print(f"Stacked performance plot saved to {self.output_dir}/stacked_performance.png")
 
 if __name__ == "__main__":
-    display = DisplayResults("output/graded/lvl3", "output/summaries/lvl3")
+    dir = sys.argv[1]
+    display = DisplayResults(dir=dir)
     # display.plot_together("output/connected_comparisons_20260120_160212.json")
     display.save_plot_performance()
     display.save_description()
