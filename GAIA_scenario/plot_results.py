@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 class DisplayResults:
     def __init__(self, input_dir:str ="output/graded", output_dir: str = "output/summaries", dir: str =""):
         self.output_dir = output_dir + "/" + dir
+        if not Path(self.output_dir).exists():
+            Path(self.output_dir).mkdir(parents=True, exist_ok=True)
         self.input_dir = input_dir + "/" + dir
         self.results = self.get_results()
 
@@ -20,15 +22,14 @@ class DisplayResults:
         :rtype: dict
         """
         results = {}
-        model_views = {}
         for file in Path(self.input_dir).glob("*.json"):
             with open(file, 'r') as f:
                 data = json.load(f)
                 model = file.stem.split('_')[1]
-                if model not in model_views:
-                    model_views[model] = 0
-                model_views[model] += 1
-                results[model + f" take-{model_views[model]}"] = data
+                for framework, framework_data in data.items():
+                    if f"{model} X {framework}" not in results:
+                        results[f"{model} X {framework}"] = []
+                    results[f"{model} X {framework}"].append(framework_data)
         return results
 
     def get_preformance(self) -> dict:
@@ -39,20 +40,19 @@ class DisplayResults:
         :rtype: dict
         """
         performance = {}
-        for model, data in self.results.items():
-            performance[model] = {}
-            for framework, framework_data in data.items():
-                summary = framework_data.get("grading_summary", {})
-                accuracy = summary.get("accuracy", 0)
-                correct_answers = summary.get("correct_answers", 0)
-                avg_time = framework_data.get("summary", {}).get("avg_execution_time", 0)
-                failed_runs = framework_data.get("summary", {}).get("failed_runs", 0)
-                performance[model][framework] = {
-                    "accuracy": accuracy,
-                    "correct_answers": correct_answers,
-                    "avg_execution_time": avg_time,
-                    "failed_runs": failed_runs
-                }
+        for agent, data in self.results.items():
+            performance[agent] = {}
+            summary = [dat["grading_summary"] for dat in data]
+            accuracy = [summ.get("accuracy", 0) for summ in summary]
+            correct_answers = [sum.get("correct_answers", 0) for sum in summary]
+            avg_time = [summ.get("summary", {}).get("avg_execution_time", 0) for summ in data]
+            failed_runs = [summ.get("summary", {}).get("failed_runs", 0) for summ in data]
+            performance[agent] = {
+                "accuracy": accuracy,
+                "correct_answers": correct_answers,
+                "avg_execution_time": avg_time,
+                "failed_runs": failed_runs
+            }
         return performance
     
     def get_literary_details(self) -> dict:
@@ -63,11 +63,10 @@ class DisplayResults:
         :rtype: dict
         """
         literary_details = {}
-        for model, data in self.results.items():
-            for framework, framework_data in data.items():
-                summary = framework_data.get("grading_summary", {})
-                details = summary.get("literary_details", {})
-                literary_details[model+" X " + framework] = details
+        for agent, agent_data in self.results.items():
+            summary = agent_data.get("grading_summary", {})
+            details = [summ.get("literary_details", {}) for summ in summary]
+            literary_details[agent] = details
         return literary_details
     
     def save_plot_performance(self):
@@ -77,7 +76,7 @@ class DisplayResults:
         :return: None
         """
         performance = self.get_preformance()
-        
+
         for metric in ["accuracy", "correct_answers", "avg_execution_time","failed_runs"]:
             plt.figure(figsize=(10, 6))
             # Define unique colors for each model
@@ -87,18 +86,24 @@ class DisplayResults:
                 'Meta-Llama-3': '#2ca02c',        # green
                 'Mistral-Small-3.2-24B-Instruct-2506': '#d62728'           # red
             }
+
+            agents = sorted(performance.keys())
             
-            for model in sorted(performance.keys()):
-                frameworks = performance[model]
-                sorted_frameworks = sorted(frameworks.keys())
-                values = [frameworks[fw][metric] for fw in sorted_frameworks]
-                
-                # Extract base model name (remove " take-X" suffix)
-                base_model = model.split(' take-')[0]
-                color = model_colors.get(base_model, '#7f7f7f')  # default gray if model not found
-                
-                plt.bar([f"{model} - {fw}" for fw in sorted_frameworks], values, 
-                       label=model, color=color)
+            # Check if any metric is a list with length > 1
+            has_multiple_values = any(len(performance[agent][metric]) > 1 for agent in agents)
+            
+            if has_multiple_values:
+                # Use box chart for multiple values
+                print(f"Plotting boxplot for metric: {metric}")
+                data_to_plot = [performance[agent][metric] for agent in agents]
+                plt.boxplot(data_to_plot, labels=agents, positions=range(len(agents)))
+            else:
+                # Use bar chart for single values
+                for agent in agents:
+                    agent_data = performance[agent]
+                    base_model = agent.split(' ')[0]
+                    color = model_colors.get(base_model, '#7f7f7f')
+                    plt.bar(agent, agent_data[metric], label=agent, color=color)
 
             plt.title(f'Model Performance: {metric.replace("_", " ").title()}')
             plt.xlabel('Model - Framework')
