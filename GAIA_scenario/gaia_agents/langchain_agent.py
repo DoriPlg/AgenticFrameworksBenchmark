@@ -87,8 +87,15 @@ class LangChainAgent(BaseAgent):
         # create_agent expects messages in the correct format
         result = self.agent.invoke(
             {"messages": [HumanMessage(content=full_question)]},
-            config={"callbacks": [langfuse_handler], "recursion_limit": 50}
-        )
+            config={
+                "callbacks": [langfuse_handler], 
+                "recursion_limit": 50,
+                "metadata":{
+                        "framework": "langgraph", 
+                        "model": self.model_config["model"]
+                        }
+                    }
+            )
         
         # Extract answer from the messages
         messages = result.get("messages", [])

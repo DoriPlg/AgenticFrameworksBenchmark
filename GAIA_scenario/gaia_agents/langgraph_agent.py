@@ -112,8 +112,15 @@ class LangGraphAgent(BaseAgent):
         
         result = self.graph.invoke(
             {"messages": messages},
-            config={"recursion_limit": 50, "callbacks": [langfuse_handler]}
-        )
+            config={
+                    "recursion_limit": 50,
+                    "callbacks": [langfuse_handler],
+                    "metadata":{
+                        "framework": "langgraph", 
+                        "model": self.model_config["model"]
+                        }
+                    }
+            )
         
         final_message = result["messages"][-1]
         answer = final_message.content if hasattr(final_message, 'content') else str(final_message)
