@@ -192,7 +192,7 @@ if __name__ == "__main__":
     
     if len(sys.argv) < 2:
         print("Usage:")
-        print("  python grade_pipeline.py <input_json> [output_path] [mode]")
+        print("  python grade_pipeline.py <input_path> [output_path] [mode]")
         print("  mode: 'single' for single agent, 'fix' for fixing assessment, or omit for comparison")
         sys.exit(1)
     
