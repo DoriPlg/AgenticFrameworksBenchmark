@@ -63,10 +63,12 @@ class DisplayResults:
         :rtype: dict
         """
         literary_details = {}
-        for agent, agent_data in self.results.items():
-            summary = agent_data.get("grading_summary", {})
-            details = [summ.get("literary_details", {}) for summ in summary]
-            literary_details[agent] = details
+        for agent, agents_data in self.results.items():
+            literary_details[agent] = []
+            for data in agents_data:
+                grading_summary = data.get("grading_summary", {})
+                details = grading_summary.get("literary_details")
+                literary_details[agent].append(details)
         return literary_details
     
     def save_plot_performance(self):
