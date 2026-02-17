@@ -5,16 +5,16 @@ import asyncio
 from agents import Agent, Runner, OpenAIChatCompletionsModel, AsyncOpenAI, function_tool, SQLiteSession, ModelSettings
 from agents.run import RunContextWrapper
 
-from langfuse import get_client
 import nest_asyncio
-from openinference.instrumentation.openai_agents import OpenAIAgentsInstrumentor
+# from langfuse import get_client
+# from openinference.instrumentation.openai_agents import OpenAIAgentsInstrumentor
 
 from gaia_agents.tools import shared_tools as st
 from gaia_agents.base_agent import BaseAgent, AgentResponse
 
 nest_asyncio.apply()
-OpenAIAgentsInstrumentor().instrument()
-langfuse = get_client()
+# OpenAIAgentsInstrumentor().instrument()
+# langfuse = get_client()
 
 class OpenAIAgent(BaseAgent):
     """OpenAI Agents framework-based agent implementation."""
@@ -75,14 +75,14 @@ class OpenAIAgent(BaseAgent):
         full_question = f"{question}{file_context}"
         
         # Run the agent asynchronously
-        with langfuse.start_as_current_observation(
-            name="OpenAI GAIA Attempt", 
-            metadata={"framework": "openai_agents", "model": self.model_config["model"]},
-            input=full_question
-        ) as observation:
-            result = asyncio.run(self._run_async(full_question))
-            observation.update(output=result)
-        langfuse.flush()
+        # with langfuse.start_as_current_observation(
+        #     name="OpenAI GAIA Attempt", 
+        #     metadata={"framework": "openai_agents", "model": self.model_config["model"]},
+        #     input=full_question
+        # ) as observation:
+        result = asyncio.run(self._run_async(full_question))
+        #     observation.update(output=result)
+        # langfuse.flush()
         
         # Extract answer from result
         answer = self._extract_answer(result)

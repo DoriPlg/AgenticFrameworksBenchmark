@@ -8,7 +8,7 @@ from pydantic import BaseModel
 from gaia_agents.tools import shared_tools as st
 from gaia_agents.base_agent import BaseAgent, AgentResponse
 
-from langfuse import get_client
+# from langfuse import get_client
 
 from openinference.instrumentation.crewai import CrewAIInstrumentor
 from openinference.instrumentation.litellm import LiteLLMInstrumentor
@@ -16,12 +16,12 @@ from openinference.instrumentation.litellm import LiteLLMInstrumentor
 CrewAIInstrumentor().instrument(skip_dep_check=True)
 LiteLLMInstrumentor().instrument()
 
-langfuse = get_client()
-# Verify connection
-if langfuse.auth_check():
-    print("Langfuse client is authenticated and ready!")
-else:
-    print("Authentication failed. Please check your credentials and host.")
+# langfuse = get_client()
+# # Verify connection
+# if langfuse.auth_check():
+#     print("Langfuse client is authenticated and ready!")
+# else:
+#     print("Authentication failed. Please check your credentials and host.")
 
 
 
@@ -114,15 +114,15 @@ class CrewAIAgent(BaseAgent):
             memory=False,
         )
 
-        with langfuse.start_as_current_observation(as_type= "span",
-            name="CrewAI GAIA Attempt", 
-            metadata={"framework": "crewai", "model": self.model_config["model"]},
-            input= {"question": question}
-            ) as observation:
-            result = crew.kickoff()
-            observation.update(output= result)
+        # with langfuse.start_as_current_observation(as_type= "span",
+        #     name="CrewAI GAIA Attempt", 
+        #     metadata={"framework": "crewai", "model": self.model_config["model"]},
+        #     input= {"question": question}
+        #     ) as observation:
+        result = crew.kickoff()
+            # observation.update(output= result)
         
-        langfuse.flush()
+        # langfuse.flush()
         return AgentResponse(
             answer=str(result),
             execution_time=time.time() - start_time,

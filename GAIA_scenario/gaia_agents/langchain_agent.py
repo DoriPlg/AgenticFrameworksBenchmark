@@ -8,12 +8,12 @@ from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage
 from langchain_core.tools import tool
 
-from langfuse.langchain import CallbackHandler
+# from langfuse.langchain import CallbackHandler
 
 from gaia_agents.tools import shared_tools as st
 from gaia_agents.base_agent import BaseAgent, AgentResponse
 
-langfuse_handler = CallbackHandler()
+# langfuse_handler = CallbackHandler()
 
 @tool(description=st.web_search.__doc__, args_schema=st.SearchInput)
 def web_search(query: str) -> str:
@@ -88,7 +88,7 @@ class LangChainAgent(BaseAgent):
         result = self.agent.invoke(
             {"messages": [HumanMessage(content=full_question)]},
             config={
-                "callbacks": [langfuse_handler], 
+                # "callbacks": [langfuse_handler], 
                 "recursion_limit": 50,
                 "metadata":{
                         "framework": "langgraph", 

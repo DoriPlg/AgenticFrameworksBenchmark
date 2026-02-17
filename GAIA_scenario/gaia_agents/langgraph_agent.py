@@ -8,12 +8,12 @@ from langchain_openai import ChatOpenAI
 from langchain_core.tools import StructuredTool
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
 
-from langfuse.langchain import CallbackHandler
+# from langfuse.langchain import CallbackHandler
 
 from gaia_agents.tools import shared_tools as st
 from gaia_agents.base_agent import BaseAgent, AgentResponse
 
-langfuse_handler = CallbackHandler()
+# langfuse_handler = CallbackHandler()
 
 # Graph State
 class AgentGraphState(TypedDict):
@@ -114,7 +114,7 @@ class LangGraphAgent(BaseAgent):
             {"messages": messages},
             config={
                     "recursion_limit": 50,
-                    "callbacks": [langfuse_handler],
+                    # "callbacks": [langfuse_handler],
                     "metadata":{
                         "framework": "langgraph", 
                         "model": self.model_config["model"]
