@@ -130,7 +130,8 @@ class DisplayResults:
 
     def plot_together(self, united_file: str):
         """
-        plots all performance metrics together in a single plot
+        plots all agets together in a single plot for comparison, whilst stacking 
+        the performance levels for each model-framework combination
         
         :param united_file: the file to save the united plot
         :type united_file: str
@@ -165,9 +166,9 @@ class DisplayResults:
 
         # Plot stacked bars for each combination
         for i, (model, framework) in enumerate([(m, f) for m in models for f in frameworks]):
-            level_1 = data[model].get(framework, {}).get("1", 0)
-            level_2 = data[model].get(framework, {}).get("2", 0)
-            level_3 = data[model].get(framework, {}).get("3", 0)
+            level_1 = data[model].get(framework, {}).get("1", {}).get("avg_correct", 0)
+            level_2 = data[model].get(framework, {}).get("2", {}).get("avg_correct", 0)
+            level_3 = data[model].get(framework, {}).get("3", {}).get("avg_correct", 0)
 
             ax.bar(x_positions[i], level_1, width, 
                label='Level 1' if i == 0 else '', color=colors[0], alpha=0.8)
@@ -191,6 +192,6 @@ class DisplayResults:
 if __name__ == "__main__":
     dir = sys.argv[1]
     display = DisplayResults(dir=dir)
-    # display.plot_together("output/connected_comparisons_20260120_160212.json")
-    display.save_plot_performance()
+    display.plot_together("output/connected_comparisons_20260219_121311.json")
+    # display.save_plot_performance()
     display.save_description()
