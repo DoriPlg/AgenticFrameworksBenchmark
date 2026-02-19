@@ -98,7 +98,7 @@ class DisplayResults:
                 # Use box chart for multiple values
                 print(f"Plotting boxplot for metric: {metric}")
                 data_to_plot = [performance[agent][metric] for agent in agents]
-                plt.boxplot(data_to_plot, labels=agents, positions=range(len(agents)))
+                plt.boxplot(data_to_plot, tick_labels=agents, positions=range(len(agents)))
             else:
                 # Use bar chart for single values
                 for agent in agents:
