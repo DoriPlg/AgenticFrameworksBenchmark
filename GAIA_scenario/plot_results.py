@@ -190,6 +190,9 @@ class DisplayResults:
         print(f"Stacked performance plot saved to {self.output_dir}/stacked_performance.png")
 
 if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Usage: python plot_results.py <directory/file_path>")
+        sys.exit(1)
     dir = sys.argv[1]
     display = DisplayResults(dir=dir)
     display.plot_together("output/connected_comparisons_20260219_121311.json")

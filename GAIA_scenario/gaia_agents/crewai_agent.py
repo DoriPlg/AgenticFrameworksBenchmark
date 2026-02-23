@@ -10,11 +10,11 @@ from gaia_agents.base_agent import BaseAgent, AgentResponse
 
 # from langfuse import get_client
 
-from openinference.instrumentation.crewai import CrewAIInstrumentor
-from openinference.instrumentation.litellm import LiteLLMInstrumentor
+# from openinference.instrumentation.crewai import CrewAIInstrumentor
+# from openinference.instrumentation.litellm import LiteLLMInstrumentor
 
-CrewAIInstrumentor().instrument(skip_dep_check=True)
-LiteLLMInstrumentor().instrument()
+# CrewAIInstrumentor().instrument(skip_dep_check=True)
+# LiteLLMInstrumentor().instrument()
 
 # langfuse = get_client()
 # # Verify connection
